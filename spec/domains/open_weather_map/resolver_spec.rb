@@ -5,7 +5,7 @@ RSpec.describe OpenWeatherMap::Resolver do
   end
 
   it 'when called with an unknown city name, the assert function returns nil' do
-    resolver_method = described_class.new.city_id('fehoiwhrei')
+    resolver_method = described_class.new.city_id('žnj')
     expect(resolver_method).to eq(nil)
   end
 end
