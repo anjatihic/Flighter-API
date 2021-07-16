@@ -11,7 +11,7 @@ module OpenWeatherMap
   def self.cities(cities)
     cities = cities.map { |city| Resolver.city_id(city) }
     cities = cities.compact.join(',')
-    response = Faraday.get "http://api.openweathermap.org/data/2.5/group?id=#{cities}&appid=a32a4c61d2155b6c3327bc95b5ee7a2f"
+    response = Faraday.get "https://api.openweathermap.org/data/2.5/group?id=#{cities}&appid=a32a4c61d2155b6c3327bc95b5ee7a2f"
     response = JSON.parse(response.body)
     cities_objects = []
     response['list'].each { |city| cities_objects << City.parse(city) }
