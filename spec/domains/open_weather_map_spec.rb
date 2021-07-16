@@ -10,4 +10,11 @@ RSpec.describe OpenWeatherMap do
       expect(city_object).to be_nil
     end
   end
+
+  describe '#cities' do
+    it 'returns an array of OpenWeatherMap::City instances' do
+      cities_objects = described_class.cities(['Zagreb', 'Berlin', 'Leeds'])
+      expect(cities_objects.class).to eq(Array)
+    end
+  end
 end
