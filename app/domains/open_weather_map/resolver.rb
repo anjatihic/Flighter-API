@@ -9,13 +9,13 @@ module OpenWeatherMap
     end
 
     def self.parse_data
-      json = OpenWeatherMap::Resolver.read_json
+      json = OpenWeatherMap::Resolver.read_file
       JSON.parse(json)
     end
 
-    def self.read_json
-      json = File.expand_path(JSON_FILE_NAME, __dir__)
-      File.read(json)
+    def self.read_file
+      file_path = File.expand_path(JSON_FILE_NAME, __dir__)
+      File.read(file_path)
     end
   end
 end

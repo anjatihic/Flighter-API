@@ -14,9 +14,9 @@ module OpenWeatherMap
     city_ids = city_ids.compact.join(',')
 
     response = OpenWeatherMap.parsed_response('group', city_ids)
-    cities_objects = []
-    response['list'].each { |city| cities_objects << City.parse(city) }
-    cities_objects
+    cities = []
+    response['list'].each { |city| cities << City.parse(city) }
+    cities
   end
 
   def self.parsed_response(type, city_id)

@@ -28,9 +28,8 @@ module OpenWeatherMap
       nearby_cities.map { |city_hash| OpenWeatherMap::City.parse(city_hash) }
     end
 
-    def coldest_nearby(num_of_cities = 5)
-      nearby_cities = nearby(num_of_cities)
-      nearby_cities.min
+    def coldest_nearby(*args)
+      nearby(*args).min
     end
 
     def response(num_of_cities)
