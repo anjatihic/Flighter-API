@@ -1,6 +1,7 @@
 module OpenWeatherMap
   class City
     KELVIN_ZERO_CELSIUS = 273.15
+    API_URL = 'https://api.openweathermap.org/data/2.5/find'
     include Comparable
     attr_accessor :id, :lat, :lon, :name, :temp_k
 
@@ -18,6 +19,22 @@ module OpenWeatherMap
 
     def <=>(other)
       temp == other.temp ? name <=> other.name : temp <=> other.temp
+    end
+
+    def nearby(num_of_cities = 5)
+      response = response(num_of_cities)
+      response = JSON.parse(response.body)
+      response = response['list']
+      response.map { |city_hash| OpenWeatherMap::City.parse(city_hash) }
+    end
+
+    def response(num_of_cities)
+      Faraday.get(API_URL.to_s) do |req|
+        req.params['lat'] = lat
+        req.params['lon'] = lon
+        req.params['cnt'] = num_of_cities
+        req.params['appid'] = Rails.application.credentials.open_weather_map_api_key
+      end
     end
 
     def self.parse(params = {})
