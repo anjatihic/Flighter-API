@@ -18,14 +18,19 @@ module OpenWeatherMap
     end
 
     def <=>(other)
-      temp == other.temp ? name <=> other.name : temp <=> other.temp
+      temp_k == other.temp_k ? name <=> other.name : temp_k <=> other.temp_k
     end
 
     def nearby(num_of_cities = 5)
       response = response(num_of_cities)
       response = JSON.parse(response.body)
-      response = response['list']
-      response.map { |city_hash| OpenWeatherMap::City.parse(city_hash) }
+      nearby_cities = response['list']
+      nearby_cities.map { |city_hash| OpenWeatherMap::City.parse(city_hash) }
+    end
+
+    def coldest_nearby(num_of_cities = 5)
+      nearby_cities = nearby(num_of_cities)
+      nearby_cities.min_by(&:temp_k)
     end
 
     def response(num_of_cities)
