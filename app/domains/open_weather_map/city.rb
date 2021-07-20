@@ -30,7 +30,7 @@ module OpenWeatherMap
 
     def coldest_nearby(num_of_cities = 5)
       nearby_cities = nearby(num_of_cities)
-      nearby_cities.min_by(&:temp_k)
+      nearby_cities.min
     end
 
     def response(num_of_cities)
