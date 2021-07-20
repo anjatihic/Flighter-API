@@ -1,5 +1,6 @@
 module OpenWeatherMap
   class City
+    KELVIN_ZERO_CELSIUS = 273.15
     include Comparable
     attr_accessor :id, :lat, :lon, :name, :temp_k
 
@@ -11,9 +12,8 @@ module OpenWeatherMap
       @name = name
     end
 
-    KELVIN_ZERO_CELSIUS = 273.15
     def temp
-      (temp_k.round(2) - KELVIN_ZERO_CELSIUS).round(2)
+      (temp_k - KELVIN_ZERO_CELSIUS).round(2)
     end
 
     def <=>(other)
@@ -21,9 +21,9 @@ module OpenWeatherMap
     end
 
     def self.parse(params = {})
-      lat = params['coord']['lat']
-      lon = params['coord']['lon']
-      temp_k = params['main']['temp']
+      lat = params.dig('coord', 'lat')
+      lon = params.dig('coord', 'lon')
+      temp_k = params.dig('main', 'temp')
       id = params['id']
       name = params['name']
 
