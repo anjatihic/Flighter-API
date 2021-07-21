@@ -13,7 +13,7 @@
 #  updated_at  :datetime         not null
 #
 class Flight < ApplicationRecord
-  attr_accessor :departs_at, :arrives_at
+  attr_accessor :departs_at
 
   belongs_to :company
   has_many :bookings, dependent: :nullify
@@ -22,11 +22,13 @@ class Flight < ApplicationRecord
 
   validates :departs_at, presence: true
   validates :arrives_at, presence: true
-  validate :departs_before_arrives
+  validate :departs_must_be_before_arrives
 
   validates :base_price, presence: true, numericality: { greater_than: 0 }
 
-  def departs_before_arrives
-    errors.add(:departs_at, "can't be after arrival time and date") if departs_at > arrives_at
+  def departs_must_be_before_arrives
+    return unless departs_at && arrives_at
+
+    errors.add(:departs_at, 'must be before arrival time') unless departs_at < arrives_at
   end
 end

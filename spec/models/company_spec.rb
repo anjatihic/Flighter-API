@@ -1,21 +1,11 @@
 RSpec.describe Company do
-  it 'is invalid without name' do
-    company = described_class.new(name: nil)
-    company.valid?
-    expect(company.errors[:name]).to include("can't be blank")
+  describe 'presence' do
+    it { is_expected.to validate_presence_of(:name) }
   end
 
-  it 'is invalid when name is already taken' do
-    described_class.create!(name: 'Company')
-    company = described_class.new(name: 'Company')
-    company.valid?
-    expect(company.errors[:name]).to include('has already been taken')
-  end
+  describe 'uniqueness' do
+    subject { described_class.new(name: 'New_airline') }
 
-  it 'is invalid when name is already taken (case insensitive)' do
-    described_class.create!(name: 'company')
-    company = described_class.new(name: 'Company')
-    company.valid?
-    expect(company.errors[:name]).to include('has already been taken')
+    it { is_expected.to validate_uniqueness_of(:name).case_insensitive }
   end
 end

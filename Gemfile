@@ -27,6 +27,7 @@ gem 'jbuilder', '~> 2.7'
 # gem 'image_processing', '~> 1.2'
 
 group :development, :test do
+  gem 'factory_bot_rails'
   gem 'faraday'
   gem 'overcommit', require: false
   gem 'pry-rails', require: false
@@ -53,6 +54,7 @@ group :test do
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '>= 3.26'
   gem 'selenium-webdriver'
+  gem 'shoulda-matchers', '~> 5.0'
   # Easy installation and use of web drivers to run system tests with browsers
   gem 'webdrivers'
 end

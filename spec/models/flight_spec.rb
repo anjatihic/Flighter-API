@@ -1,7 +1,11 @@
 RSpec.describe Flight do
-  it 'is invalid without a name' do
-    flight = described_class.new(name: nil)
-    flight.valid?
-    expect(flight.errors[:name]).to include("can't be blank")
+  describe 'presence' do
+    it { is_expected.to validate_presence_of(:name) }
+  end
+
+  describe 'uniqueness' do
+    before { FactoryBot.create(:flight) }
+
+    it { is_expected.to validate_uniqueness_of(:name).scoped_to(:company_id) }
   end
 end

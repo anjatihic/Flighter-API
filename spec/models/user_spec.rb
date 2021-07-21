@@ -1,39 +1,21 @@
 RSpec.describe User do
-  it 'is invalid without an email' do
-    user = described_class.new(email: nil)
-    user.valid?
-    expect(user.errors[:email]).to include("can't be blank")
+  describe 'presence' do
+    it { is_expected.to validate_presence_of(:email) }
+
+    it { is_expected.to validate_presence_of(:first_name) }
   end
 
-  it 'is invalid when email is already taken' do
-    described_class.create!(first_name: 'User', email: 'user@email.com')
-    user = described_class.new(email: 'user@email.com')
-    user.valid?
-    expect(user.errors[:email]).to include('has already been taken')
+  describe 'uniqueness' do
+    subject { FactoryBot.create(:user) }
+
+    it { is_expected.to validate_uniqueness_of(:email).case_insensitive }
   end
 
-  it 'is invalid when email is already taken (case insensitive)' do
-    described_class.create!(first_name: 'User', email: 'user@email.com')
-    user = described_class.new(email: 'User@email.com')
-    user.valid?
-    expect(user.errors[:email]).to include('has already been taken')
+  describe 'format' do
+    it { is_expected.not_to allow_value('foo').for(:email) }
   end
 
-  it 'is invalid when email is not in the right format' do
-    user = described_class.new(email: 'heirhierh')
-    user.valid?
-    expect(user.errors[:email]).to include('is invalid')
-  end
-
-  it 'is invalid without first name' do
-    user = described_class.new(first_name: nil)
-    user.valid?
-    expect(user.errors[:first_name]).to include("can't be blank")
-  end
-
-  it 'is invalid when first_name is shorter than two characters' do
-    user = described_class.new(first_name: 'A')
-    user.valid?
-    expect(user.errors[:first_name]).to include('is too short (minimum is 2 characters)')
+  describe 'length' do
+    it { is_expected.to validate_length_of(:first_name).is_at_least(2) }
   end
 end
