@@ -13,8 +13,6 @@
 #  updated_at  :datetime         not null
 #
 class Flight < ApplicationRecord
-  attr_accessor :departs_at
-
   belongs_to :company
   has_many :bookings, dependent: :nullify
 

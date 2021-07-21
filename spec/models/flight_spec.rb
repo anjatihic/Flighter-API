@@ -4,8 +4,8 @@ RSpec.describe Flight do
   end
 
   describe 'uniqueness' do
-    before { FactoryBot.create(:flight) }
+    subject { FactoryBot.create(:flight) }
 
-    it { is_expected.to validate_uniqueness_of(:name).scoped_to(:company_id) }
+    it { is_expected.to validate_uniqueness_of(:name).scoped_to(:company_id).case_insensitive }
   end
 end

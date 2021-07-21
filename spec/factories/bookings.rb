@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :booking do
-    association :company
+    association :flight
     association :user
 
     no_of_seats { 100 }
