@@ -7,6 +7,7 @@ RSpec.describe Booking do
   it { is_expected.to validate_presence_of(:no_of_seats) }
   it { is_expected.to validate_numericality_of(:no_of_seats) }
 
+  # test for custom validation
   it 'is invalid when the departure time is in the past' do
     booking.flight.departs_at = Time.now.utc.last_month
 
