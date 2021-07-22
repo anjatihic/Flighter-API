@@ -40,5 +40,4 @@ yarn-debug.log*
 .yarn-integrity
 
 /config/credentials/test.key
-
-.idea/workspace.xml
+/.idea
