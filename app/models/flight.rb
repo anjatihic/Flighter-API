@@ -24,6 +24,8 @@ class Flight < ApplicationRecord
 
   validates :base_price, presence: true, numericality: { greater_than: 0 }
 
+  validates :no_of_seats, presence: true, numericality: { greater_than: 0 }
+
   def departs_must_be_before_arrives
     return unless departs_at && arrives_at
 

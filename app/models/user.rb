@@ -10,6 +10,8 @@
 #  updated_at :datetime         not null
 #
 class User < ApplicationRecord
+  has_many :bookings, dependent: :nullify
+
   validates :email, presence: true,
                     uniqueness: { case_sensitive: false },
                     format: /\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/
