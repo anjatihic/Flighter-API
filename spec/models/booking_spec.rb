@@ -13,6 +13,6 @@ RSpec.describe Booking do
 
     booking.valid?
 
-    expect(booking.errors[:base]).to include("can't be in the past")
+    expect(booking.errors[:flight]).to include("can't be in the past")
   end
 end
