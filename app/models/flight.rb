@@ -27,6 +27,6 @@ class Flight < ApplicationRecord
   def departs_must_be_before_arrives
     return unless departs_at && arrives_at
 
-    errors.add(:departs_at, 'must be before arrival time') unless departs_at < arrives_at
+    errors.add(:departs_at, 'must be before arrival time') if departs_at > arrives_at
   end
 end

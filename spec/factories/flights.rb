@@ -3,7 +3,7 @@ FactoryBot.define do
     association :company
     name { 'test' }
     departs_at { Time.now.utc.next_month }
-    arrives_at { Time.now.utc.next_year }
+    arrives_at { Time.now.utc.next_month + 2.hours }
     base_price { 200 }
     no_of_seats { 250 }
   end
