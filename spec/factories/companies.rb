@@ -1,5 +1,5 @@
 FactoryBot.define do
   factory :company do
-    name { "ime#{Time.now.utc}" }
+    sequence(:name) { |n| "company#{n}" }
   end
 end
