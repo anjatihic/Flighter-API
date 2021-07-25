@@ -39,12 +39,15 @@ RSpec.describe 'Flights API', type: :request do
     let(:company) { create(:company) }
     let(:valid_params) do
       {
-        name: 'Test flight',
-        no_of_seats: 300,
-        base_price: 500,
-        departs_at: Time.now.utc.next_month,
-        arrives_at: Time.now.utc.next_month + 3.hours,
-        company_id: company.id
+        flight:
+        {
+          name: 'Test flight',
+          no_of_seats: 300,
+          base_price: 500,
+          departs_at: Time.now.utc.next_month,
+          arrives_at: Time.now.utc.next_month + 3.hours,
+          company_id: company.id
+        }
       }
     end
 
@@ -79,11 +82,14 @@ RSpec.describe 'Flights API', type: :request do
     let(:company) { create(:company) }
     let(:invalid_params) do
       {
-        name: 'Test flight',
-        no_of_seats: 300,
-        base_price: 500,
-        arrives_at: Time.now.utc.next_month + 3.hours,
-        company_id: company.id
+        flight:
+        {
+          name: 'Test flight',
+          no_of_seats: 300,
+          base_price: 500,
+          arrives_at: Time.now.utc.next_month + 3.hours,
+          company_id: company.id
+        }
       }
     end
 
@@ -104,7 +110,7 @@ RSpec.describe 'Flights API', type: :request do
     let(:flight) { create(:flight) }
     let(:valid_params) do
       {
-        name: 'New flight'
+        flight: { name: 'New flight' }
       }
     end
 
@@ -138,7 +144,7 @@ RSpec.describe 'Flights API', type: :request do
     let(:flight) { create(:flight) }
     let(:invalid_params) do
       {
-        base_price: -200
+        flight: { base_price: -200 }
       }
     end
 

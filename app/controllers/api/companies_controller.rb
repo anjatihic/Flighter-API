@@ -44,7 +44,7 @@ module Api
     private
 
     def company_params
-      params.permit(:name)
+      params.require(:company).permit(:name)
     end
   end
 end

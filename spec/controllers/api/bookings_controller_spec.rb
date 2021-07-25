@@ -38,10 +38,13 @@ RSpec.describe 'Bookings API', type: :request do
     let(:user) { create(:user) }
     let(:valid_params) do
       {
-        no_of_seats: 2,
-        user_id: user.id,
-        seat_price: 400,
-        flight_id: flight.id
+        booking:
+        {
+          no_of_seats: 2,
+          user_id: user.id,
+          seat_price: 400,
+          flight_id: flight.id
+        }
       }
     end
 
@@ -75,9 +78,12 @@ RSpec.describe 'Bookings API', type: :request do
     let(:flight) { create(:flight) }
     let(:invalid_params) do
       {
-        user_id: user.id,
-        seat_price: 400,
-        flight_id: flight.id
+        booking:
+        {
+          user_id: user.id,
+          seat_price: 400,
+          flight_id: flight.id
+        }
       }
     end
 
@@ -98,7 +104,7 @@ RSpec.describe 'Bookings API', type: :request do
     let(:booking) { create(:booking) }
     let(:valid_params) do
       {
-        no_of_seats: 2
+        booking: { no_of_seats: 2 }
       }
     end
 
@@ -130,7 +136,7 @@ RSpec.describe 'Bookings API', type: :request do
     let(:booking) { create(:booking) }
     let(:invalid_params) do
       {
-        no_of_seats: -3
+        booking: { no_of_seats: -3 }
       }
     end
 

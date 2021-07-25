@@ -33,7 +33,7 @@ RSpec.describe 'Companies API', type: :request do
   describe 'Create action (valid params)' do
     let(:valid_params) do
       {
-        name: 'Test Company'
+        company: { name: 'Test Company' }
       }
     end
 
@@ -60,16 +60,26 @@ RSpec.describe 'Companies API', type: :request do
   end
 
   describe 'Create action (invalid params)' do
+    let(:company) { create(:company) }
+    let(:invalid_params) do
+      {
+        company:
+        {
+          name: company.name
+        }
+      }
+    end
+
     it 'returns the correct HTTP status code' do
-      post '/api/companies'
+      post '/api/companies', params: invalid_params
 
       expect(response).to have_http_status(:bad_request)
     end
 
     it 'returns a correct error message' do
-      post '/api/companies'
+      post '/api/companies', params: invalid_params
 
-      expect(json_response['errors']['name']).to include("can't be blank")
+      expect(json_response['errors']['name']).to include('has already been taken')
     end
   end
 
@@ -77,7 +87,7 @@ RSpec.describe 'Companies API', type: :request do
     let(:company) { create(:company) }
     let(:valid_params) do
       {
-        name: 'New company'
+        company: { name: 'New company' }
       }
     end
 
@@ -107,7 +117,7 @@ RSpec.describe 'Companies API', type: :request do
     let(:company2) { create(:company) }
     let(:invalid_params) do
       {
-        name: company2.name
+        company: { name: company2.name }
       }
     end
 

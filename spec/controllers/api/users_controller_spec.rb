@@ -35,9 +35,12 @@ RSpec.describe 'Users API', type: :request do
   describe 'Create action (valid params)' do
     let(:valid_params) do
       {
-        first_name: 'Jane',
-        last_name: 'Doe',
-        email: 'email@email.com'
+        user:
+        {
+          first_name: 'Jane',
+          last_name: 'Doe',
+          email: 'email@email.com'
+        }
       }
     end
 
@@ -68,8 +71,11 @@ RSpec.describe 'Users API', type: :request do
   describe 'Create action (invalid params)' do
     let(:invalid_params) do
       {
-        first_name: 'John',
-        last_name: 'Doe'
+        user:
+        {
+          first_name: 'John',
+          last_name: 'Doe'
+        }
       }
     end
 
@@ -90,7 +96,7 @@ RSpec.describe 'Users API', type: :request do
     let(:user) { create(:user) }
     let(:valid_params) do
       {
-        first_name: 'Jane'
+        user: { first_name: 'Jane' }
       }
     end
 
@@ -122,7 +128,7 @@ RSpec.describe 'Users API', type: :request do
     let(:user2) { create(:user) }
     let(:invalid_params) do
       {
-        email: user2.email
+        user: { email: user2.email }
       }
     end
 
