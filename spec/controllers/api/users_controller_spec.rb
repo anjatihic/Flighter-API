@@ -1,147 +1,211 @@
 RSpec.describe 'Users API', type: :request do
-  describe 'index action' do
+  describe 'GET /api/users, #index' do
     it 'returns the correct HTTP status code' do
-      get '/api/users'
+      get '/api/users', headers: { 'Content-Type': 'application/json',
+                                   'Accept': 'application/json' }
 
       expect(response).to have_http_status(:ok)
     end
 
     it 'returns the correct number of records' do
       create_list(:user, 3)
-      get '/api/users'
+      get '/api/users', headers: { 'Content-Type': 'application/json',
+                                   'Accept': 'application/json' }
 
       expect(json_response['users'].size).to eq 3
     end
+
+    it 'returns an empty json hash when no records in database' do
+      get '/api/users', headers: { 'Content-Type': 'application/json',
+                                   'Accept': 'application/json' }
+
+      expect(json_response['users'].size).to eq 0
+    end
   end
 
-  describe 'Show action' do
+  describe 'GET /api/users/:id, #show' do
     let(:user) { create(:user) }
 
     it 'returns the correct HTTP status code' do
-      get "/api/users/#{user.id}"
+      get "/api/users/#{user.id}", headers: { 'Content-Type': 'application/json',
+                                              'Accept': 'application/json' }
 
       expect(response).to have_http_status(:ok)
     end
 
     it 'returns correct attributes' do
-      get "/api/users/#{user.id}"
+      get "/api/users/#{user.id}", headers: { 'Content-Type': 'application/json',
+                                              'Accept': 'application/json' }
 
       expect(json_response['user']).to include('first_name')
       expect(json_response['user']).to include('last_name')
       expect(json_response['user']).to include('email')
     end
+
+    it 'returns an error message when user not found' do
+      get "/api/users/#{user.id + 1}", headers: { 'Content-Type': 'application/json',
+                                                  'Accept': 'application/json' }
+
+      expect(json_response).to include('errors')
+    end
   end
 
-  describe 'Create action (valid params)' do
-    let(:valid_params) do
-      {
-        user:
+  describe 'POST /api/users, #create' do
+    context 'with valid params' do
+      let(:valid_params) do
         {
-          first_name: 'Jane',
-          last_name: 'Doe',
-          email: 'email@email.com'
+          user:
+          {
+            first_name: 'Jane',
+            last_name: 'Doe',
+            email: 'email@email.com'
+          }
         }
-      }
+      end
+
+      it 'returns the correct HTTP status code' do
+        post '/api/users', params: valid_params.to_json,
+                           headers: { 'Content-Type': 'application/json',
+                                      'Accept': 'application/json' }
+
+        expect(response).to have_http_status(:created)
+      end
+
+      it 'returns correct attributes' do
+        post '/api/users', params: valid_params.to_json,
+                           headers: { 'Content-Type': 'application/json',
+                                      'Accept': 'application/json' }
+
+        expect(json_response['user']).to include('first_name')
+        expect(json_response['user']).to include('last_name')
+        expect(json_response['user']).to include('email')
+      end
+
+      it 'creates a new record' do
+        expect do
+          post '/api/users', params: valid_params.to_json,
+                             headers: { 'Content-Type': 'application/json',
+                                        'Accept': 'application/json' }
+        end.to change(User, :count).by(1)
+      end
     end
 
-    it 'returns the correct HTTP status code' do
-      post '/api/users', params: valid_params
-
-      expect(response).to have_http_status(:created)
-    end
-
-    it 'returns correct attributes' do
-      post '/api/users', params: valid_params
-
-      expect(json_response['user']).to include('first_name')
-      expect(json_response['user']).to include('last_name')
-      expect(json_response['user']).to include('email')
-    end
-
-    it 'creates a new record' do
-      post '/api/users', params: valid_params
-      create_list(:user, 2)
-
-      get '/api/users'
-
-      expect(json_response['users'].size).to eq 3
-    end
-  end
-
-  describe 'Create action (invalid params)' do
-    let(:invalid_params) do
-      {
-        user:
+    context 'with invalid params' do
+      let(:invalid_params) do
         {
-          first_name: 'John',
-          last_name: 'Doe'
+          user:
+          {
+            first_name: 'John',
+            last_name: 'Doe'
+          }
         }
-      }
-    end
+      end
 
-    it 'returns the correct HTTP status code' do
-      post '/api/users', params: invalid_params
+      it 'returns the correct HTTP status code' do
+        post '/api/users', params: invalid_params.to_json,
+                           headers: { 'Content-Type': 'application/json',
+                                      'Accept': 'application/json' }
 
-      expect(response).to have_http_status(:bad_request)
-    end
+        expect(response).to have_http_status(:bad_request)
+      end
 
-    it 'returns a correct error message' do
-      post '/api/users', params: invalid_params
+      it 'returns a correct error message' do
+        post '/api/users', params: invalid_params.to_json,
+                           headers: { 'Content-Type': 'application/json',
+                                      'Accept': 'application/json' }
 
-      expect(json_response['errors']['email']).to include("can't be blank")
-    end
-  end
+        expect(json_response['errors']['email']).to include("can't be blank")
+      end
 
-  describe 'Update action (valid params)' do
-    let(:user) { create(:user) }
-    let(:valid_params) do
-      {
-        user: { first_name: 'Jane' }
-      }
-    end
-
-    it 'returns the correct HTTP status code' do
-      put "/api/users/#{user.id}", params: valid_params
-
-      expect(response).to have_http_status(:ok)
-    end
-
-    it 'returns the correct attributes' do
-      put "/api/users/#{user.id}", params: valid_params
-
-      expect(json_response['user']).to include('first_name')
-      expect(json_response['user']).to include('last_name')
-      expect(json_response['user']).to include('email')
-    end
-
-    it 'correctly updates data' do
-      put "/api/users/#{user.id}", params: valid_params
-
-      get "/api/users/#{user.id}"
-
-      expect(json_response['user']['first_name']).to include('Jane')
+      it "doesn't create a new record" do
+        expect do
+          post '/api/users', params: invalid_params.to_json,
+                             headers: { 'Content-Type': 'application/json',
+                                        'Accept': 'application/json' }
+        end.to change(User, :count).by(0)
+      end
     end
   end
 
-  describe 'Update action (invalid params)' do
+  describe 'PUT /api/users, #update' do
+    context 'with valid params' do
+      let(:user) { create(:user) }
+      let(:valid_params) do
+        {
+          user: { first_name: 'Jane' }
+        }
+      end
+
+      it 'returns the correct HTTP status code' do
+        put "/api/users/#{user.id}", params: valid_params.to_json,
+                                     headers: { 'Content-Type': 'application/json',
+                                                'Accept': 'application/json' }
+
+        expect(response).to have_http_status(:ok)
+      end
+
+      it 'returns the correct attributes' do
+        put "/api/users/#{user.id}", params: valid_params.to_json,
+                                     headers: { 'Content-Type': 'application/json',
+                                                'Accept': 'application/json' }
+
+        expect(json_response['user']).to include('first_name')
+        expect(json_response['user']).to include('last_name')
+        expect(json_response['user']).to include('email')
+      end
+
+      it 'correctly updates data' do
+        put "/api/users/#{user.id}", params: valid_params.to_json,
+                                     headers: { 'Content-Type': 'application/json',
+                                                'Accept': 'application/json' }
+
+        expect(User.find(user.id)['first_name']).to include('Jane')
+      end
+    end
+
+    context 'with invalid params' do
+      let(:user) { create(:user) }
+      let(:user2) { create(:user) }
+      let(:invalid_params) do
+        {
+          user: { email: user2.email }
+        }
+      end
+
+      it 'returns the correct HTTP status code' do
+        put "/api/users/#{user.id}", params: invalid_params.to_json,
+                                     headers: { 'Content-Type': 'application/json',
+                                                'Accept': 'application/json' }
+
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      it 'returns a correct error message' do
+        put "/api/users/#{user.id}", params: invalid_params.to_json,
+                                     headers: { 'Content-Type': 'application/json',
+                                                'Accept': 'application/json' }
+
+        expect(json_response['errors']['email']).to include('has already been taken')
+        expect(User.find(user.id)['email']).to include(user.email)
+      end
+    end
+  end
+
+  describe 'DELETE /api/bookings/:id, #destroy' do
     let(:user) { create(:user) }
-    let(:user2) { create(:user) }
-    let(:invalid_params) do
-      {
-        user: { email: user2.email }
-      }
+
+    it 'removes a user from database' do
+      delete "/api/users/#{user.id}", headers: { 'Content-Type': 'application/json',
+                                                 'Accept': 'application/json' }
+
+      expect(User.find_by(id: user.id)).to eq nil
     end
 
-    it 'returns the correct HTTP status code' do
-      put "/api/users/#{user.id}", params: invalid_params
+    it 'returns a correct HTTP status code' do
+      delete "/api/users/#{user.id}", headers: { 'Content-Type': 'application/json',
+                                                 'Accept': 'application/json' }
 
-      expect(response).to have_http_status(:bad_request)
-    end
-
-    it 'returns a correct error message' do
-      put "/api/users/#{user.id}", params: invalid_params
-
-      expect(json_response['errors']['email']).to include('has already been taken')
+      expect(response).to have_http_status(:no_content)
     end
   end
 end

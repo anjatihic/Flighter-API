@@ -7,9 +7,13 @@ module Api
 
     # GET /api/flights/:id
     def show
-      flight = Flight.find(params[:id])
+      flight = Flight.find_by(id: params[:id])
 
-      render json: FlightSerializer.render(flight, root: :flight)
+      if flight
+        render json: FlightSerializer.render(flight, root: :flight)
+      else
+        render json: { errors: "Couldn't find the Flight" }, status: :bad_request
+      end
     end
 
     # POST /api/flights
@@ -25,20 +29,21 @@ module Api
 
     # DELETE /api/flights/:id
     def destroy
-      flight = Flight.find(params[:id])
-
-      flight.destroy
+      flight = Flight.find_by(id: params[:id])
+      if flight
+        flight.destroy
+      else
+        render json: { errors: "Couldn't find Flight" }, status: :bad_request
+      end
     end
 
     # PATCH /api/flights/:id
     def update
-      flight = Flight.find(params[:id])
+      flight = Flight.find_by(id: params[:id])
 
-      if flight.update(flight_params)
-        render json: FlightSerializer.render(flight, root: :flight)
-      else
-        render json: { errors: flight.errors }, status: :bad_request
-      end
+      return flight_update(flight) if flight
+
+      render json: { errors: "Couldn't find the Flight" }, status: :bad_request
     end
 
     private
@@ -50,6 +55,14 @@ module Api
                                      :departs_at,
                                      :arrives_at,
                                      :company_id)
+    end
+
+    def flight_update(flight)
+      if flight.update(flight_params)
+        render json: FlightSerializer.render(flight, root: :flight)
+      else
+        render json: { errors: flight.errors }, status: :bad_request
+      end
     end
   end
 end

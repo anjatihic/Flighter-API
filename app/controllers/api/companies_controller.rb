@@ -7,9 +7,13 @@ module Api
 
     # GET /api/companies/:id
     def show
-      company = Company.find(params[:id])
+      company = Company.find_by(id: params[:id])
 
-      render json: CompanySerializer.render(company, root: :company)
+      if company
+        render json: CompanySerializer.render(company, root: :company)
+      else
+        render json: { errors: "Couldn't find the Company" }, status: :bad_request
+      end
     end
 
     # POST /api/companies
@@ -25,26 +29,35 @@ module Api
 
     # DELETE /api/companies/:id
     def destroy
-      company = Company.find(params[:id])
-
-      company.destroy
+      company = Company.find_by(id: params[:id])
+      if company
+        company.destroy
+      else
+        render json: { errors: "Couldn't find Company" }, status: :bad_request
+      end
     end
 
     # PATCH /api/companies/:id
     def update
-      company = Company.find(params[:id])
+      company = Company.find_by(id: params[:id])
 
-      if company.update(company_params)
-        render json: CompanySerializer.render(company, root: :company)
-      else
-        render json: { errors: company.errors }, status: :bad_request
-      end
+      return company_update(company) if company
+
+      render json: { errors: "Couldn't find the Company" }, status: :bad_request
     end
 
     private
 
     def company_params
       params.require(:company).permit(:name)
+    end
+
+    def company_update(company)
+      if company.update(company_params)
+        render json: CompanySerializer.render(company, root: :company)
+      else
+        render json: { errors: company.errors }, status: :bad_request
+      end
     end
   end
 end

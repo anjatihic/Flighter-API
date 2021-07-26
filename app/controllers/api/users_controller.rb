@@ -7,9 +7,13 @@ module Api
 
     # GET /api/users/:id
     def show
-      user = User.find(params[:id])
+      user = User.find_by(id: params[:id])
 
-      render json: UserSerializer.render(user, root: :user), status: :ok
+      if user
+        render json: UserSerializer.render(user, root: :user)
+      else
+        render json: { errors: "Couldn't find the User" }, status: :bad_request
+      end
     end
 
     # POST /api/users
@@ -25,26 +29,35 @@ module Api
 
     # DELETE /api/users/:id
     def destroy
-      user = User.find(params[:id])
-
-      user.destroy
+      user = User.find_by(id: params[:id])
+      if user
+        user.destroy
+      else
+        render json: { errors: "Couldn't find User" }, status: :bad_request
+      end
     end
 
     # PATCH /api/users/:id
     def update
-      user = User.find(params[:id])
+      user = User.find_by(id: params[:id])
 
-      if user.update(user_params)
-        render json: UserSerializer.render(user, root: :user)
-      else
-        render json: { errors: user.errors }, status: :bad_request
-      end
+      return user_update(user) if user
+
+      render json: { errors: "Couldn't find the User" }, status: :bad_request
     end
 
     private
 
     def user_params
       params.require(:user).permit(:first_name, :last_name, :email)
+    end
+
+    def user_update(user)
+      if user.update(user_params)
+        render json: UserSerializer.render(user, root: :user)
+      else
+        render json: { errors: user.errors }, status: :bad_request
+      end
     end
   end
 end
