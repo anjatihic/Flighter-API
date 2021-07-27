@@ -12,7 +12,7 @@ module Api
       if booking
         render json: BookingSerializer.render(booking, root: :booking)
       else
-        render json: { errors: "Couldn't find the Booking" }, status: :bad_request
+        render json: { errors: "Couldn't find the Booking" }, status: :not_found
       end
     end
 
@@ -33,7 +33,7 @@ module Api
       if booking
         booking.destroy
       else
-        render json: { errors: "Couldn't find Booking" }, status: :bad_request
+        render json: { errors: "Couldn't find Booking" }, status: :not_found
       end
     end
 
@@ -43,7 +43,7 @@ module Api
 
       return booking_update(booking) if booking
 
-      render json: { errors: "Couldn't find the Booking" }, status: :bad_request
+      render json: { errors: "Couldn't find the Booking" }, status: :not_found
     end
 
     private

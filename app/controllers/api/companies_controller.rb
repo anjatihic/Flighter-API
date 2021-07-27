@@ -12,7 +12,7 @@ module Api
       if company
         render json: CompanySerializer.render(company, root: :company)
       else
-        render json: { errors: "Couldn't find the Company" }, status: :bad_request
+        render json: { errors: "Couldn't find the Company" }, status: :not_found
       end
     end
 
@@ -33,7 +33,7 @@ module Api
       if company
         company.destroy
       else
-        render json: { errors: "Couldn't find Company" }, status: :bad_request
+        render json: { errors: "Couldn't find Company" }, status: :not_found
       end
     end
 
@@ -43,7 +43,7 @@ module Api
 
       return company_update(company) if company
 
-      render json: { errors: "Couldn't find the Company" }, status: :bad_request
+      render json: { errors: "Couldn't find the Company" }, status: :not_found
     end
 
     private

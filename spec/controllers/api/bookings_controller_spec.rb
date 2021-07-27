@@ -1,8 +1,14 @@
 RSpec.describe 'Bookings API', type: :request do
+  let(:request_headers) do
+    {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  end
+
   describe 'GET /api/bookings, #index' do
     it 'returns the correct HTTP status code' do
-      get '/api/bookings', headers: { 'Content-Type': 'application/json',
-                                      'Accept': 'application/json' }
+      get '/api/bookings', headers: request_headers
 
       expect(response).to have_http_status(:ok)
     end
@@ -10,15 +16,13 @@ RSpec.describe 'Bookings API', type: :request do
     it 'returns the correct number of records' do
       create_list(:booking, 2)
 
-      get '/api/bookings', headers: { 'Content-Type': 'application/json',
-                                      'Accept': 'application/json' }
+      get '/api/bookings', headers: request_headers
 
       expect(json_response['bookings'].size).to eq 2
     end
 
     it 'returns an empty json hash when no records in database' do
-      get '/api/bookings', headers: { 'Content-Type': 'application/json',
-                                      'Accept': 'application/json' }
+      get '/api/bookings', headers: request_headers
 
       expect(json_response['bookings'].size).to eq 0
     end
@@ -28,15 +32,13 @@ RSpec.describe 'Bookings API', type: :request do
     let(:booking) { create(:booking) }
 
     it 'returns the correct HTTP status code' do
-      get "/api/bookings/#{booking.id}", headers: { 'Content-Type': 'application/json',
-                                                    'Accept': 'application/json' }
+      get "/api/bookings/#{booking.id}", headers: request_headers
 
       expect(response).to have_http_status(:ok)
     end
 
     it 'returns correct attributes' do
-      get "/api/bookings/#{booking.id}", headers: { 'Content-Type': 'application/json',
-                                                    'Accept': 'application/json' }
+      get "/api/bookings/#{booking.id}", headers: request_headers
 
       expect(json_response['booking']).to include('no_of_seats')
       expect(json_response['booking']).to include('user')
@@ -44,10 +46,11 @@ RSpec.describe 'Bookings API', type: :request do
       expect(json_response['booking']).to include('flight')
     end
 
-    it 'returns correct error message when booking not found' do
-      get "/api/bookings/#{booking.id + 1}", headers: { 'Accept': 'application/json' }
+    it 'returns error when booking not found' do
+      get "/api/bookings/#{booking.id + 1}", headers: request_headers
 
       expect(json_response).to include('errors')
+      expect(response).to have_http_status(:not_found)
     end
   end
 
@@ -69,16 +72,14 @@ RSpec.describe 'Bookings API', type: :request do
 
       it 'returns the correct HTTP status code' do
         post '/api/bookings', params: valid_params.to_json,
-                              headers: { 'Content-Type': 'application/json',
-                                         'Accept': 'application/json' }
+                              headers: request_headers
 
         expect(response).to have_http_status(:created)
       end
 
       it 'returns correct attributes' do
         post '/api/bookings', params: valid_params.to_json,
-                              headers: { 'Content-Type': 'application/json',
-                                         'Accept': 'application/json' }
+                              headers: request_headers
 
         expect(json_response['booking']).to include('no_of_seats')
         expect(json_response['booking']).to include('user')
@@ -89,8 +90,7 @@ RSpec.describe 'Bookings API', type: :request do
       it 'creates a new record' do
         expect do
           post '/api/bookings', params: valid_params.to_json,
-                                headers: { 'Content-Type': 'application/json',
-                                           'Accept': 'application/json' }
+                                headers: request_headers
         end.to change(Booking, :count).by(1)
       end
     end
@@ -111,16 +111,14 @@ RSpec.describe 'Bookings API', type: :request do
 
       it 'returns the correct HTTP status code' do
         post '/api/bookings', params: invalid_params.to_json,
-                              headers: { 'Content-Type': 'application/json',
-                                         'Accept': 'application/json' }
+                              headers: request_headers
 
         expect(response).to have_http_status(:bad_request)
       end
 
       it 'returns a correct error message' do
         post '/api/bookings', params: invalid_params.to_json,
-                              headers: { 'Content-Type': 'application/json',
-                                         'Accept': 'application/json' }
+                              headers: request_headers
 
         expect(json_response['errors']['no_of_seats']).to include("can't be blank")
       end
@@ -128,8 +126,7 @@ RSpec.describe 'Bookings API', type: :request do
       it "doesn't create a new record" do
         expect do
           post '/api/bookings', params: invalid_params.to_json,
-                                headers: { 'Content-Type': 'application/json',
-                                           'Accept': 'application/json' }
+                                headers: request_headers
         end.to change(Booking, :count).by(0)
       end
     end
@@ -146,16 +143,14 @@ RSpec.describe 'Bookings API', type: :request do
 
       it 'returns the correct HTTP status code' do
         put "/api/bookings/#{booking.id}", params: valid_params.to_json,
-                                           headers: { 'Content-Type': 'application/json',
-                                                      'Accept': 'application/json' }
+                                           headers: request_headers
 
         expect(response).to have_http_status(:ok)
       end
 
       it 'returns the correct attributes' do
         put "/api/bookings/#{booking.id}", params: valid_params.to_json,
-                                           headers: { 'Content-Type': 'application/json',
-                                                      'Accept': 'application/json' }
+                                           headers: request_headers
 
         expect(json_response['booking']).to include('no_of_seats')
         expect(json_response['booking']).to include('user')
@@ -165,10 +160,9 @@ RSpec.describe 'Bookings API', type: :request do
 
       it 'correctly updates data' do
         put "/api/bookings/#{booking.id}", params: valid_params.to_json,
-                                           headers: { 'Content-Type': 'application/json',
-                                                      'Accept': 'application/json' }
+                                           headers: request_headers
 
-        expect(Booking.find(booking.id)['no_of_seats']).to eq 2
+        expect(Booking.find(booking.id).no_of_seats).to eq booking.reload.no_of_seats
       end
     end
 
@@ -182,18 +176,17 @@ RSpec.describe 'Bookings API', type: :request do
 
       it 'returns the correct HTTP status code' do
         put "/api/bookings/#{booking.id}", params: invalid_params.to_json,
-                                           headers: { 'Content-Type': 'application/json',
-                                                      'Accept': 'application/json' }
+                                           headers: request_headers
 
         expect(response).to have_http_status(:bad_request)
       end
 
       it 'returns a correct error message' do
         put "/api/bookings/#{booking.id}", params: invalid_params.to_json,
-                                           headers: { 'Content-Type': 'application/json',
-                                                      'Accept': 'application/json' }
+                                           headers: request_headers
+
         expect(json_response['errors']['no_of_seats']).to include('must be greater than 0')
-        expect(Booking.find(booking.id)['no_of_seats']).to eq(booking.no_of_seats)
+        expect(Booking.find(booking.id).no_of_seats).to eq(booking.no_of_seats)
       end
     end
   end
@@ -202,15 +195,13 @@ RSpec.describe 'Bookings API', type: :request do
     let(:booking) { create(:booking) }
 
     it 'removes a booking from database' do
-      delete "/api/bookings/#{booking.id}", headers: { 'Content-Type': 'application/json',
-                                                       'Accept': 'application/json' }
+      delete "/api/bookings/#{booking.id}", headers: request_headers
 
       expect(Booking.find_by(id: booking.id)).to eq nil
     end
 
     it 'returns a correct HTTP status code' do
-      delete "/api/bookings/#{booking.id}", headers: { 'Content-Type': 'application/json',
-                                                       'Accept': 'application/json' }
+      delete "/api/bookings/#{booking.id}", headers: request_headers
 
       expect(response).to have_http_status(:no_content)
     end

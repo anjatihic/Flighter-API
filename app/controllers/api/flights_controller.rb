@@ -12,7 +12,7 @@ module Api
       if flight
         render json: FlightSerializer.render(flight, root: :flight)
       else
-        render json: { errors: "Couldn't find the Flight" }, status: :bad_request
+        render json: { errors: "Couldn't find the Flight" }, status: :not_found
       end
     end
 
@@ -33,7 +33,7 @@ module Api
       if flight
         flight.destroy
       else
-        render json: { errors: "Couldn't find Flight" }, status: :bad_request
+        render json: { errors: "Couldn't find Flight" }, status: :not_found
       end
     end
 
@@ -43,7 +43,7 @@ module Api
 
       return flight_update(flight) if flight
 
-      render json: { errors: "Couldn't find the Flight" }, status: :bad_request
+      render json: { errors: "Couldn't find the Flight" }, status: :not_found
     end
 
     private

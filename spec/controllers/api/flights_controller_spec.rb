@@ -1,23 +1,27 @@
 RSpec.describe 'Flights API', type: :request do
+  let(:request_headers) do
+    {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  end
+
   describe 'GET /api/flights, #index' do
     it 'returns the correct HTTP status code' do
-      get '/api/flights', headers: { 'Content-Type': 'application/json',
-                                     'Accept': 'application/json' }
+      get '/api/flights', headers: request_headers
 
       expect(response).to have_http_status(:ok)
     end
 
     it 'returns the correct number of records' do
       create_list(:flight, 2)
-      get '/api/flights', headers: { 'Content-Type': 'application/json',
-                                     'Accept': 'application/json' }
+      get '/api/flights', headers: request_headers
 
       expect(json_response['flights'].size).to eq 2
     end
 
     it 'returns an empty json hash when no records in database' do
-      get '/api/flights', headers: { 'Content-Type': 'application/json',
-                                     'Accept': 'application/json' }
+      get '/api/flights', headers: request_headers
 
       expect(json_response['flights'].size).to eq 0
     end
@@ -27,15 +31,13 @@ RSpec.describe 'Flights API', type: :request do
     let(:flight) { create(:flight) }
 
     it 'returns the correct HTTP status code' do
-      get "/api/flights/#{flight.id}", headers: { 'Content-Type': 'application/json',
-                                                  'Accept': 'application/json' }
+      get "/api/flights/#{flight.id}", headers: request_headers
 
       expect(response).to have_http_status(:ok)
     end
 
     it 'returns correct attributes' do
-      get "/api/flights/#{flight.id}", headers: { 'Content-Type': 'application/json',
-                                                  'Accept': 'application/json' }
+      get "/api/flights/#{flight.id}", headers: request_headers
 
       expect(json_response['flight']).to include('name')
       expect(json_response['flight']).to include('no_of_seats')
@@ -45,11 +47,11 @@ RSpec.describe 'Flights API', type: :request do
       expect(json_response['flight']).to include('company')
     end
 
-    it 'returns an error message when flight not found' do
-      get "/api/flights/#{flight.id + 1}", headers: { 'Content-Type': 'application/json',
-                                                      'Accept': 'application/json' }
+    it 'returns error when flight not found' do
+      get "/api/flights/#{flight.id + 1}", headers: request_headers
 
       expect(json_response).to include('errors')
+      expect(response).to have_http_status(:not_found)
     end
   end
 
@@ -72,16 +74,14 @@ RSpec.describe 'Flights API', type: :request do
 
       it 'returns the correct HTTP status code' do
         post '/api/flights', params: valid_params.to_json,
-                             headers: { 'Content-Type': 'application/json',
-                                        'Accept': 'application/json' }
+                             headers: request_headers
 
         expect(response).to have_http_status(:created)
       end
 
       it 'returns correct attributes' do
         post '/api/flights', params: valid_params.to_json,
-                             headers: { 'Content-Type': 'application/json',
-                                        'Accept': 'application/json' }
+                             headers: request_headers
 
         expect(json_response['flight']).to include('name')
         expect(json_response['flight']).to include('no_of_seats')
@@ -94,8 +94,7 @@ RSpec.describe 'Flights API', type: :request do
       it 'creates a new record' do
         expect do
           post '/api/flights', params: valid_params.to_json,
-                               headers: { 'Content-Type': 'application/json',
-                                          'Accept': 'application/json' }
+                               headers: request_headers
         end.to change(Flight, :count).by(1)
       end
     end
@@ -117,16 +116,14 @@ RSpec.describe 'Flights API', type: :request do
 
       it 'returns the correct HTTP status code' do
         post '/api/flights', params: invalid_params.to_json,
-                             headers: { 'Content-Type': 'application/json',
-                                        'Accept': 'application/json' }
+                             headers: request_headers
 
         expect(response).to have_http_status(:bad_request)
       end
 
       it 'returns a correct error message' do
         post '/api/flights', params: invalid_params.to_json,
-                             headers: { 'Content-Type': 'application/json',
-                                        'Accept': 'application/json' }
+                             headers: request_headers
 
         expect(json_response['errors']['departs_at']).to include("can't be blank")
       end
@@ -134,8 +131,7 @@ RSpec.describe 'Flights API', type: :request do
       it "doesn't create a new record" do
         expect do
           post '/api/flights', params: invalid_params.to_json,
-                               headers: { 'Content-Type': 'application/json',
-                                          'Accept': 'application/json' }
+                               headers: request_headers
         end.to change(Flight, :count).by(0)
       end
     end
@@ -152,16 +148,14 @@ RSpec.describe 'Flights API', type: :request do
 
       it 'returns the correct HTTP status code' do
         put "/api/flights/#{flight.id}", params: valid_params.to_json,
-                                         headers: { 'Content-Type': 'application/json',
-                                                    'Accept': 'application/json' }
+                                         headers: request_headers
 
         expect(response).to have_http_status(:ok)
       end
 
       it 'returns the correct attributes' do
         put "/api/flights/#{flight.id}", params: valid_params.to_json,
-                                         headers: { 'Content-Type': 'application/json',
-                                                    'Accept': 'application/json' }
+                                         headers: request_headers
 
         expect(json_response['flight']).to include('name')
         expect(json_response['flight']).to include('no_of_seats')
@@ -173,10 +167,9 @@ RSpec.describe 'Flights API', type: :request do
 
       it 'correctly updates data' do
         put "/api/flights/#{flight.id}", params: valid_params.to_json,
-                                         headers: { 'Content-Type': 'application/json',
-                                                    'Accept': 'application/json' }
+                                         headers: request_headers
 
-        expect(Flight.find(flight.id)['name']).to include('New flight')
+        expect(Flight.find(flight.id).name).to include(flight.reload.name)
       end
     end
 
@@ -190,19 +183,17 @@ RSpec.describe 'Flights API', type: :request do
 
       it 'returns the correct HTTP status code' do
         put "/api/flights/#{flight.id}", params: invalid_params.to_json,
-                                         headers: { 'Content-Type': 'application/json',
-                                                    'Accept': 'application/json' }
+                                         headers: request_headers
 
         expect(response).to have_http_status(:bad_request)
       end
 
       it 'returns a correct error message' do
         put "/api/flights/#{flight.id}", params: invalid_params.to_json,
-                                         headers: { 'Content-Type': 'application/json',
-                                                    'Accept': 'application/json' }
+                                         headers: request_headers
 
         expect(json_response['errors']['base_price']).to include('must be greater than 0')
-        expect(Flight.find(flight.id)['base_price']).to eq(flight.base_price)
+        expect(Flight.find(flight.id).base_price).to eq(flight.base_price)
       end
     end
   end
@@ -211,15 +202,13 @@ RSpec.describe 'Flights API', type: :request do
     let(:flight) { create(:flight) }
 
     it 'removes a flights from database' do
-      delete "/api/flights/#{flight.id}", headers: { 'Content-Type': 'application/json',
-                                                     'Accept': 'application/json' }
+      delete "/api/flights/#{flight.id}", headers: request_headers
 
       expect(Flight.find_by(id: flight.id)).to eq nil
     end
 
     it 'returns a correct HTTP status code' do
-      delete "/api/flights/#{flight.id}", headers: { 'Content-Type': 'application/json',
-                                                     'Accept': 'application/json' }
+      delete "/api/flights/#{flight.id}", headers: request_headers
 
       expect(response).to have_http_status(:no_content)
     end

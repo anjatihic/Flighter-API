@@ -12,7 +12,7 @@ module Api
       if user
         render json: UserSerializer.render(user, root: :user)
       else
-        render json: { errors: "Couldn't find the User" }, status: :bad_request
+        render json: { errors: "Couldn't find the User" }, status: :not_found
       end
     end
 
@@ -33,7 +33,7 @@ module Api
       if user
         user.destroy
       else
-        render json: { errors: "Couldn't find User" }, status: :bad_request
+        render json: { errors: "Couldn't find User" }, status: :not_found
       end
     end
 
@@ -43,7 +43,7 @@ module Api
 
       return user_update(user) if user
 
-      render json: { errors: "Couldn't find the User" }, status: :bad_request
+      render json: { errors: "Couldn't find the User" }, status: :not_found
     end
 
     private
