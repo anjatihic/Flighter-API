@@ -152,7 +152,7 @@ RSpec.describe 'Users API', type: :request do
         put "/api/users/#{user.id}", params: valid_params.to_json,
                                      headers: request_headers
 
-        expect(User.find(user.id).first_name).to include(user.reload.first_name)
+        expect(user.reload.first_name).to include(valid_params[:user][:first_name])
       end
     end
 

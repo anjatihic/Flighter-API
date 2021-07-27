@@ -169,7 +169,7 @@ RSpec.describe 'Flights API', type: :request do
         put "/api/flights/#{flight.id}", params: valid_params.to_json,
                                          headers: request_headers
 
-        expect(Flight.find(flight.id).name).to include(flight.reload.name)
+        expect(flight.reload.name).to include(valid_params[:flight][:name])
       end
     end
 

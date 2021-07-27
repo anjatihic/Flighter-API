@@ -162,7 +162,7 @@ RSpec.describe 'Bookings API', type: :request do
         put "/api/bookings/#{booking.id}", params: valid_params.to_json,
                                            headers: request_headers
 
-        expect(Booking.find(booking.id).no_of_seats).to eq booking.reload.no_of_seats
+        expect(booking.reload.no_of_seats).to eq valid_params[:booking][:no_of_seats]
       end
     end
 

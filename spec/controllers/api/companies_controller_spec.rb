@@ -141,7 +141,7 @@ RSpec.describe 'Companies API', type: :request do
         put "/api/companies/#{company.id}", params: valid_params.to_json,
                                             headers: request_headers
 
-        expect(Company.find(company.id).name).to include(company.reload.name)
+        expect(company.reload.name).to include(valid_params[:company][:name])
       end
     end
 
