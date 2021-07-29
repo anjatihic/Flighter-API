@@ -1,18 +1,24 @@
 module Api
   class UsersController < ApplicationController
+    before_action :token_match, only: [:index, :show, :destroy, :update]
+
     # GET /api/users
     def index
-      render json: UserSerializer.render(User.all, root: :users), status: :ok
+      if current_user.admin?
+        render json: UserSerializer.render(User.all, root: :users), status: :ok
+      else
+        render json: { errors: { resource: ['forbidden'] } }, status: :forbidden
+      end
     end
 
     # GET /api/users/:id
     def show
-      user = User.find_by(id: params[:id])
+      user = User.find(params[:id])
 
-      if user
+      if current_user.admin? || current_user.id == user.id
         render json: UserSerializer.render(user, root: :user)
       else
-        render json: { errors: "Couldn't find the User" }, status: :not_found
+        render json: { errors: { resource: ['forbidden'] } }, status: :forbidden
       end
     end
 
@@ -29,31 +35,38 @@ module Api
 
     # DELETE /api/users/:id
     def destroy
-      user = User.find_by(id: params[:id])
-      if user
+      user = User.find(params[:id])
+
+      if current_user.admin? || current_user.id == user.id
         user.destroy
       else
-        render json: { errors: "Couldn't find User" }, status: :not_found
+        render json: { errors: { resource: ['forbidden'] } }, status: :forbidden
       end
     end
 
     # PATCH /api/users/:id
     def update
-      user = User.find_by(id: params[:id])
+      user = User.find(params[:id])
 
-      return user_update(user) if user
+      return user_update(user, admin_user_params) if current_user.admin?
 
-      render json: { errors: "Couldn't find the User" }, status: :not_found
+      return user_update(user, admin_user_params) if current_user.id == user.id
+
+      render json: { errors: { resource: ['forbidden'] } }, status: :forbidden
     end
 
     private
 
     def user_params
-      params.require(:user).permit(:first_name, :last_name, :email)
+      params.require(:user).permit(:first_name, :last_name, :email, :password)
     end
 
-    def user_update(user)
-      if user.update(user_params)
+    def admin_user_params
+      params.require(:user).permit(:first_name, :last_name, :email, :password, :role)
+    end
+
+    def user_update(user, params)
+      if user.update(params)
         render json: UserSerializer.render(user, root: :user)
       else
         render json: { errors: user.errors }, status: :bad_request
