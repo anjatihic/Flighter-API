@@ -1,5 +1,5 @@
 module Api
-  class SessionsController < ApplicationController
+  class SessionController < ApplicationController
     before_action :token_match, only: [:destroy]
 
     # POST /api/session
