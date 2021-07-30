@@ -7,7 +7,7 @@ module Api
       if current_user.admin?
         render json: UserSerializer.render(User.all, root: :users), status: :ok
       else
-        render json: { errors: { resource: ['forbidden'] } }, status: :forbidden
+        render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
       end
     end
 
@@ -18,7 +18,7 @@ module Api
       if current_user.admin? || current_user.id == user.id
         render json: UserSerializer.render(user, root: :user)
       else
-        render json: { errors: { resource: ['forbidden'] } }, status: :forbidden
+        render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
       end
     end
 
@@ -40,7 +40,7 @@ module Api
       if current_user.admin? || current_user.id == user.id
         user.destroy
       else
-        render json: { errors: { resource: ['forbidden'] } }, status: :forbidden
+        render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
       end
     end
 
@@ -52,7 +52,7 @@ module Api
 
       return user_update(user, admin_user_params) if current_user.id == user.id
 
-      render json: { errors: { resource: ['forbidden'] } }, status: :forbidden
+      render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
     end
 
     private

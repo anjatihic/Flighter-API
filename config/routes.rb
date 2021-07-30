@@ -4,6 +4,6 @@ Rails.application.routes.draw do
     resources :companies, only: [:index, :show, :create, :destroy, :update]
     resources :flights, only: [:index, :show, :create, :destroy, :update]
     resources :bookings, only: [:index, :show, :create, :destroy, :update]
-    resources :sessions, only: [:create, :destroy]
+    resources :session, only: [:create, :destroy], controller: 'sessions'
   end
 end
