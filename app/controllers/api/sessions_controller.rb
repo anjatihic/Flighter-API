@@ -14,7 +14,7 @@ module Api
     end
 
     def destroy
-      user = User.find_by(email: session_params[:email])
+      user = User.find(params[:id])
       user.regenerate_token
 
       head :no_content
