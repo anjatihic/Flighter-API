@@ -183,8 +183,9 @@ RSpec.describe 'Bookings API', type: :request do
       end
     end
 
-    context 'when authenticated or authorized' do
+    context 'when authenticated' do
       context 'with valid params' do
+        let!(:user) { create(:user, token: 'abc') } # rubocop:disable  RSpec/LetSetup
         let(:flight) { create(:flight) }
         let(:valid_params) do
           {
@@ -193,6 +194,82 @@ RSpec.describe 'Bookings API', type: :request do
               no_of_seats: 2,
               seat_price: 1000,
               flight_id: flight.id
+            }
+          }
+        end
+
+        it 'returns the correct HTTP status code' do
+          post '/api/bookings', params: valid_params.to_json,
+                                headers: request_headers
+
+          expect(response).to have_http_status(:created)
+        end
+
+        it 'returns correct attributes' do
+          post '/api/bookings', params: valid_params.to_json,
+                                headers: request_headers
+
+          expect(json_response['booking']).to include('no_of_seats')
+          expect(json_response['booking']).to include('user')
+          expect(json_response['booking']).to include('seat_price')
+          expect(json_response['booking']).to include('flight')
+        end
+
+        it 'creates a new record' do
+          expect do
+            post '/api/bookings', params: valid_params.to_json,
+                                  headers: request_headers
+          end.to change(Booking, :count).by(1)
+        end
+      end
+
+      context 'with invalid params' do
+        let(:invalid_params) do
+          {
+            booking:
+            {
+              no_of_seats: 2,
+              seat_price: 400
+            }
+          }
+        end
+
+        it 'returns the correct HTTP status code' do
+          post '/api/bookings', params: invalid_params.to_json,
+                                headers: admin_request_headers
+
+          expect(response).to have_http_status(:bad_request)
+        end
+
+        it 'returns an error message' do
+          post '/api/bookings', params: invalid_params.to_json,
+                                headers: admin_request_headers
+
+          expect(json_response).to include('errors')
+        end
+
+        it "doesn't create a new record" do
+          expect do
+            post '/api/bookings', params: invalid_params.to_json,
+                                  headers: admin_request_headers
+          end.not_to change(Booking, :count)
+        end
+      end
+    end
+
+    context 'when authorized' do
+      let(:flight) { create(:flight) }
+      let(:user) { create(:user) }
+
+      context 'with valid params' do
+        let(:valid_params) do
+          {
+            booking:
+            {
+              no_of_seats: 2,
+              seat_price: 1000,
+              flight_id: flight.id,
+              user_id: user.id
             }
           }
         end
@@ -228,7 +305,8 @@ RSpec.describe 'Bookings API', type: :request do
             booking:
             {
               no_of_seats: 2,
-              seat_price: 400
+              user_id: user.id,
+              flight_id: flight.id
             }
           }
         end

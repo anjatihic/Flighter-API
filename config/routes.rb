@@ -4,6 +4,8 @@ Rails.application.routes.draw do
     resources :companies, only: [:index, :show, :create, :destroy, :update]
     resources :flights, only: [:index, :show, :create, :destroy, :update]
     resources :bookings, only: [:index, :show, :create, :destroy, :update]
-    resources :session, only: [:create, :destroy]
+
+    post '/session', to: 'session#create'
+    delete '/session', to: 'session#destroy'
   end
 end

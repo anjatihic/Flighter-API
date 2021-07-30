@@ -1,5 +1,5 @@
 RSpec.describe 'Session API', type: :request do
-  let(:user) { create(:user, password: 'pass', token: 'abc') }
+  let!(:user) { create(:user, password: 'pass', token: 'abc') }
   let(:params) do
     {
       session:
@@ -51,7 +51,7 @@ RSpec.describe 'Session API', type: :request do
 
   describe 'DELETE /api/session, #destroy' do
     it 'returns the correct HTTP code status' do
-      delete "/api/session/#{user.id}", headers: request_headers_with_token
+      delete '/api/session', headers: request_headers_with_token
 
       expect(response).to have_http_status(:no_content)
     end
@@ -59,7 +59,7 @@ RSpec.describe 'Session API', type: :request do
     it 'changes token' do
       original_token = user.token
 
-      delete "/api/session/#{user.id}", headers: request_headers_with_token
+      delete '/api/session', headers: request_headers_with_token
 
       expect(user.reload.token).not_to eq(original_token)
     end

@@ -4,22 +4,18 @@ module Api
 
     # GET /api/users
     def index
-      if current_user.admin?
-        render json: UserSerializer.render(User.all, root: :users), status: :ok
-      else
-        render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
-      end
+      raise ResourceForbiddenError unless current_user.admin?
+
+      render json: UserSerializer.render(User.all, root: :users), status: :ok
     end
 
     # GET /api/users/:id
     def show
       user = User.find(params[:id])
 
-      if current_user.admin? || current_user.id == user.id
-        render json: UserSerializer.render(user, root: :user)
-      else
-        render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
-      end
+      raise ResourceForbiddenError unless current_user.admin? || current_user.id == user.id
+
+      render json: UserSerializer.render(user, root: :user)
     end
 
     # POST /api/users
@@ -37,11 +33,9 @@ module Api
     def destroy
       user = User.find(params[:id])
 
-      if current_user.admin? || current_user.id == user.id
-        user.destroy
-      else
-        render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
-      end
+      raise ResourceForbiddenError unless current_user.admin? || current_user.id == user.id
+
+      user.destroy
     end
 
     # PATCH /api/users/:id
@@ -52,7 +46,7 @@ module Api
 
       return user_update(user, user_params) if current_user.id == user.id
 
-      render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
+      raise ResourceForbiddenError
     end
 
     private

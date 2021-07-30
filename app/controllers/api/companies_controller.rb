@@ -16,9 +16,7 @@ module Api
 
     # POST /api/companies
     def create
-      unless current_user.admin?
-        return render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
-      end
+      raise ResourceForbiddenError unless current_user.admin?
 
       company = Company.new(company_params)
 
@@ -31,9 +29,7 @@ module Api
 
     # DELETE /api/companies/:id
     def destroy
-      unless current_user.admin?
-        return render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
-      end
+      raise ResourceForbiddenError unless current_user.admin?
 
       company = Company.find(params[:id])
 
@@ -42,9 +38,7 @@ module Api
 
     # PATCH /api/companies/:id
     def update
-      unless current_user.admin?
-        return render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
-      end
+      raise ResourceForbiddenError unless current_user.admin?
 
       company = Company.find(params[:id])
 

@@ -6,7 +6,7 @@ module Api
     def create
       user = User.find_by(email: session_params[:email])
 
-      if user.authenticate(session_params[:password])
+      if user&.authenticate(session_params[:password])
         user.regenerate_token if user.token.nil?
 
         render json: { session: { token: user.token, user: UserSerializer.render_as_hash(user) } }, status: :created # rubocop: disable Layout/LineLength
@@ -15,10 +15,11 @@ module Api
       end
     end
 
-    # DELETE /api/session/:id
+    # DELETE /api/session
     def destroy
-      user = User.find(params[:id])
-      user.regenerate_token
+      user = User.find_by(token: token)
+
+      user&.regenerate_token
 
       head :no_content
     end

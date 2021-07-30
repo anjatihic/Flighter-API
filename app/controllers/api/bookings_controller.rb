@@ -15,17 +15,14 @@ module Api
     def show
       booking = Booking.find(params[:id])
 
-      if current_user.admin? || current_user.id == booking.user_id
-        render json: BookingSerializer.render(booking, root: :booking)
-      else
-        render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
-      end
+      raise ResourceForbiddenError unless current_user.admin? || current_user.id == booking.user_id
+
+      render json: BookingSerializer.render(booking, root: :booking)
     end
 
     # POST /api/bookings
     def create
-      booking = Booking.new(booking_params)
-      booking.user_id = current_user.id
+      booking = new_booking
 
       if booking.save
         render json: BookingSerializer.render(booking, root: :booking), status: :created
@@ -37,11 +34,10 @@ module Api
     # DELETE /api/bookings/:id
     def destroy
       booking = Booking.find(params[:id])
-      if current_user.admin? || booking.user_id == current_user.id
-        booking.destroy
-      else
-        render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
-      end
+
+      raise ResourceForbiddenError unless current_user.admin? || current_user.id == booking.user_id
+
+      booking.destroy
     end
 
     # PATCH /api/bookings/:id
@@ -52,7 +48,7 @@ module Api
 
       return booking_update(booking, booking_params) if current_user.id == booking.user_id
 
-      render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
+      raise ResourceForbiddenError
     end
 
     private
@@ -70,6 +66,14 @@ module Api
         render json: BookingSerializer.render(booking, root: :booking)
       else
         render json: { errors: booking.errors }, status: :bad_request
+      end
+    end
+
+    def new_booking
+      if current_user.admin?
+        Booking.new(admin_booking_params)
+      else
+        Booking.new(booking_params.merge!(user: current_user))
       end
     end
   end

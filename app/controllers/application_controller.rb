@@ -1,7 +1,11 @@
 class ApplicationController < ActionController::Base
   skip_before_action :verify_authenticity_token
 
-  include Pundit
+  class ResourceForbiddenError < StandardError; end
+
+  rescue_from ResourceForbiddenError do |_error|
+    render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
+  end
 
   rescue_from ActiveRecord::RecordNotFound do |_error|
     render json: { errors: 'Record not found' }, status: :not_found

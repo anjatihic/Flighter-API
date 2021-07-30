@@ -16,9 +16,7 @@ module Api
 
     # POST /api/flights
     def create
-      unless current_user.admin?
-        return render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
-      end
+      raise ResourceForbiddenError unless current_user.admin?
 
       flight = Flight.new(flight_params)
 
@@ -31,9 +29,7 @@ module Api
 
     # DELETE /api/flights/:id
     def destroy
-      unless current_user.admin?
-        return render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
-      end
+      raise ResourceForbiddenError unless current_user.admin?
 
       flight = Flight.find(params[:id])
 
@@ -42,9 +38,7 @@ module Api
 
     # PATCH /api/flights/:id
     def update
-      unless current_user.admin?
-        return render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
-      end
+      raise ResourceForbiddenError unless current_user.admin?
 
       flight = Flight.find(params[:id])
 
