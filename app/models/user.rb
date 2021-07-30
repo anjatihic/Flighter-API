@@ -24,6 +24,8 @@ class User < ApplicationRecord
 
   validates :first_name, presence: true, length: { minimum: 2 }
 
+  validates :password_digest, presence: true
+
   def admin?
     role == 'admin'
   end

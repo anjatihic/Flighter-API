@@ -50,7 +50,7 @@ module Api
 
       return user_update(user, admin_user_params) if current_user.admin?
 
-      return user_update(user, admin_user_params) if current_user.id == user.id
+      return user_update(user, user_params) if current_user.id == user.id
 
       render json: { errors: { 'resource': ['is forbidden'] } }, status: :forbidden
     end

@@ -11,7 +11,7 @@ module Api
 
         render json: { session: { token: user.token, user: UserSerializer.render_as_hash(user) } }, status: :created # rubocop: disable Layout/LineLength
       else
-        render json: { errors: { credentials: ['are invalid'] } }
+        render json: { errors: { credentials: ['are invalid'] } }, status: :bad_request
       end
     end
 
