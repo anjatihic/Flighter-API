@@ -20,7 +20,11 @@ module Api
 
     # POST /api/users
     def create
-      user = User.new(user_params)
+      if token
+        user = User.new(admin_user_params) if creator(token).admin?
+      else
+        user = User.new(user_params)
+      end
 
       if user.save
         render json: UserSerializer.render(user, root: :user), status: :created
@@ -65,6 +69,10 @@ module Api
       else
         render json: { errors: user.errors }, status: :bad_request
       end
+    end
+
+    def creator(token)
+      User.find_by(token: token)
     end
   end
 end
