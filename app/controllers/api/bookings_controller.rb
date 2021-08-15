@@ -93,7 +93,7 @@ module Api
                                                                         Time.zone.now),
                                               root: :bookings)
       else
-        render json: BookingSerializer.render(current_user.bookings_order, root: :bookings)
+        render json: BookingSerializer.render(user_bookings_query, root: :bookings)
       end
     end
 
