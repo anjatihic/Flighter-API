@@ -4,7 +4,14 @@ module Api
 
     # GET /api/companies ---> available to everyone
     def index
-      render json: CompanySerializer.render(Company.all, root: :companies)
+      if company_filter_params[:filter] == 'active'
+        render json: CompanySerializer.render(Company.select('companies.*')
+                                                     .where('flights.departs_at > ?', Time.zone.now)
+                                                     .joins(:flights)
+                                                     .order('companies.name'), root: :companies)
+      else
+        render json: CompanySerializer.render(Company.order(:name), root: :companies)
+      end
     end
 
     # GET /api/companies/:id ----> available to everyone
@@ -49,6 +56,10 @@ module Api
 
     def company_params
       params.require(:company).permit(:name)
+    end
+
+    def company_filter_params
+      params.permit(:filter)
     end
 
     def company_update(company)

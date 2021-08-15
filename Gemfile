@@ -41,6 +41,7 @@ end
 
 group :development do
   gem 'annotate'
+  gem 'bullet'
   gem 'listen', '~> 3.3'
   # Display performance information such as SQL time and flame graphs for each request in your
   # browser.

@@ -26,6 +26,13 @@ class User < ApplicationRecord
 
   validates :password_digest, presence: true
 
+  scope :filter_query, lambda { |query|
+    where('LOWER(email) LIKE ? OR LOWER(first_name) LIKE ? OR LOWER(last_name) LIKE ?',
+          "%#{query}%", "%#{query}%", "%#{query}%")
+  }
+
+  scope :name_cont, ->(word) { where('flights.name LIKE ?', "%#{word}%") }
+
   def admin?
     role == 'admin'
   end
