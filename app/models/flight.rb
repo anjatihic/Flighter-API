@@ -45,8 +45,11 @@ class Flight < ApplicationRecord
 
     needed_time = departs_at...arrives_at
 
-    Company.find(company_id).flights.each do |company_flight|
+    company.flights.each do |company_flight|
+      next if id == company_flight.id
+
       busy_time = company_flight.departs_at...company_flight.arrives_at
+
       if busy_time.cover?(needed_time)
         errors.add(:departs_at, 'no available aircrafts')
         break
