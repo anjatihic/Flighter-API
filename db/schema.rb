@@ -30,11 +30,12 @@ ActiveRecord::Schema.define(version: 2021_07_28_112754) do
     t.string "name", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["name"], name: "index_companies_on_name", unique: true
   end
 
   create_table "flights", force: :cascade do |t|
     t.string "name"
-    t.integer "no_of_seats"
+    t.integer "no_of_seats", null: false
     t.integer "base_price"
     t.datetime "departs_at"
     t.datetime "arrives_at"
@@ -42,6 +43,7 @@ ActiveRecord::Schema.define(version: 2021_07_28_112754) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["company_id"], name: "index_flights_on_company_id"
+    t.index ["name", "company_id"], name: "index_flights_on_name_and_company_id", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -50,9 +52,10 @@ ActiveRecord::Schema.define(version: 2021_07_28_112754) do
     t.string "email", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "password_digest", null: false
     t.text "token"
     t.string "role"
-    t.string "password_digest"
+    t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["token"], name: "index_users_on_token", unique: true
   end
 
