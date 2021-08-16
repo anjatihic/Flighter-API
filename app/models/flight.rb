@@ -67,7 +67,8 @@ class Flight < ApplicationRecord
     if days_left >= 15
       base_price
     else
-      ((15 - days_left) / 15) * base_price + base_price
+      new_price = ((15 - days_left) / 15.00) * base_price + base_price
+      new_price.round
     end
   end
 end
