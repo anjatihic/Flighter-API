@@ -4,12 +4,8 @@ module Api
 
     # GET /api/flights ----> available to everyone
     def index
-      if flight_filter_params
-        @flights = Flight.where(nil)
-        filtered_view
-      else
-        render json: FlightSerializer.render(flight_query_order, root: :flights)
-      end
+      @flights = Flight.where(nil)
+      filtered_view
     end
 
     # GET /api/flights/:id ------> available to everyone
@@ -71,7 +67,7 @@ module Api
         @flights = @flights.public_send(key.to_s, value) if value.present?
       end
 
-      render json: FlightSerializer.render(@flights, root: :flights)
+      render json: FlightSerializer.render(flight_query_order, root: :flights)
     end
 
     def flight_update(flight)
@@ -83,9 +79,9 @@ module Api
     end
 
     def flight_query_order
-      Flight.includes(:company)
-            .where('departs_at < ? ', Time.zone.now)
-            .order('departs_at', 'name', 'created_at')
+      @flights.includes(:company)
+              .where('CURRENT_TIMESTAMP <  departs_at')
+              .order('departs_at', 'name', 'created_at')
     end
   end
 end
