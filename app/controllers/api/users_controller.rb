@@ -19,9 +19,11 @@ module Api
     end
 
     # POST /api/users
-    def create
+    def create # rubocop:disable Metrics/MethodLength
+      creator = User.find_by(token: token)
+
       if token
-        user = User.new(admin_user_params) if creator(token).admin?
+        user = User.new(admin_user_params) if creator.admin?
       else
         user = User.new(user_params)
       end
@@ -69,10 +71,6 @@ module Api
       else
         render json: { errors: user.errors }, status: :bad_request
       end
-    end
-
-    def creator(token)
-      User.find_by(token: token)
     end
   end
 end
