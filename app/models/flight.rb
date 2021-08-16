@@ -20,7 +20,8 @@ class Flight < ApplicationRecord
 
   scope :name_cont, ->(word) { where('flights.name LIKE ?', "%#{word}%") }
   scope :departs_at_eq, ->(timestamp) { where("DATE_TRUNC('second', departs_at) = ?", timestamp) }
-  # scope :no_of_available_seats_gteq, ->(no_seats) {}
+  scope :no_of_available_seats_gteq,
+        ->(no_seats) { left_outer_joins(:bookings).having('flights.no_of_seats - SUM(bookings.no_of_seats) >= ?', no_seats).group('flights.id') } # rubocop:disable Layout/LineLength
 
   validates :name, presence: true, uniqueness: { scope: :company_id, case_sensitive: false }
 
@@ -63,6 +64,8 @@ class Flight < ApplicationRecord
 
   def current_price
     days_left = (departs_at - Time.now.utc).div(SECONDS_IN_A_DAY)
+
+    return base_price * 2 if days_left <= 0
 
     if days_left >= 15
       base_price
