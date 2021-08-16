@@ -79,6 +79,7 @@ module Api
     end
 
     def flight_query_order
+      # pogledaj zasto zeitwerk ne prepoznaje FlightsQuery klasu
       @flights.includes(:company)
               .where('CURRENT_TIMESTAMP <  departs_at')
               .order('departs_at', 'name', 'created_at')
