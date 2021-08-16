@@ -9,7 +9,7 @@ module Api
       if user&.authenticate(session_params[:password])
         user.regenerate_token if user.token.nil?
 
-        render json: { session: { token: user.token, user: UserSerializer.render_as_hash(user) } }, status: :created # rubocop: disable Layout/LineLength
+        render json: json_response(user), status: :created
       else
         render json: { errors: { credentials: ['are invalid'] } }, status: :bad_request
       end
@@ -28,6 +28,10 @@ module Api
 
     def session_params
       params.require(:session).permit(:email, :password)
+    end
+
+    def json_response(user)
+      { session: { token: user.token, user: UserSerializer.render_as_hash(user) } }
     end
   end
 end
