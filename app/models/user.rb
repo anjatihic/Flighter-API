@@ -28,7 +28,7 @@ class User < ApplicationRecord
 
   scope :filter_query, lambda { |query|
     where('LOWER(email) LIKE ? OR LOWER(first_name) LIKE ? OR LOWER(last_name) LIKE ?',
-          "%#{query.downcase}%", "%#{query.downcase}%", "%#{query.downcase}%")
+          "%#{query}%", "%#{query}%", "%#{query}%")
   }
 
   def admin?
