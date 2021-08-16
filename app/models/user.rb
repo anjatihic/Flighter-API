@@ -28,10 +28,8 @@ class User < ApplicationRecord
 
   scope :filter_query, lambda { |query|
     where('LOWER(email) LIKE ? OR LOWER(first_name) LIKE ? OR LOWER(last_name) LIKE ?',
-          "%#{query}%", "%#{query}%", "%#{query}%")
+          "%#{query.downcase}%", "%#{query.downcase}%", "%#{query.downcase}%")
   }
-
-  scope :name_cont, ->(word) { where('flights.name LIKE ?', "%#{word}%") }
 
   def admin?
     role == 'admin'
