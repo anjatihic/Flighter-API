@@ -5,11 +5,8 @@ module Api
     # GET /api/companies ---> available to everyone
     def index
       if company_filter_params[:filter] == 'active'
-        render json: CompanySerializer.render(Company.select('companies.*')
-                                                     .distinct
-                                                     .where('flights.departs_at > ?', Time.zone.now)
-                                                     .joins(:flights)
-                                                     .order('companies.name'), root: :companies)
+        render json: CompanySerializer.render(Api::CompaniesQuery.new.ordered_companies_with_filter,
+                                              root: :companies)
       else
         render json: CompanySerializer.render(Company.order(:name), root: :companies)
       end

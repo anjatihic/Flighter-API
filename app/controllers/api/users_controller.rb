@@ -6,7 +6,9 @@ module Api
     def index
       raise ResourceForbiddenError unless current_user.admin?
 
-      index_reponse
+      @users = User.order('email').filter_query(filter_params[:query])
+
+      render json: UserSerializer.render(@users, root: :users)
     end
 
     # GET /api/users/:id
@@ -67,12 +69,6 @@ module Api
 
     def filter_params
       params.permit(:query)
-    end
-
-    def index_reponse
-      @users = User.order('email').filter_query(filter_params[:query])
-
-      render json: UserSerializer.render(@users, root: :users)
     end
 
     def user_update(user, params)

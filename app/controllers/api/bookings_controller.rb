@@ -79,9 +79,9 @@ module Api
 
     def admin_index_response
       if params['filter'] == 'active'
-        render json: BookingSerializer.render(admin_bookings_query.where('flights.departs_at > ?',
-                                                                         Time.zone.now),
-                                              root: :bookings)
+        query = admin_bookings_query.where('flights.departs_at > ?', Time.zone.now)
+
+        render json: BookingSerializer.render(query, root: :bookings)
       else
         render json: BookingSerializer.render(admin_bookings_query, root: :bookings)
       end
@@ -89,25 +89,19 @@ module Api
 
     def user_index_response
       if params['filter'] == 'active'
-        render json: BookingSerializer.render(user_bookings_query.where('flights.departs_at > ?',
-                                                                        Time.zone.now),
-                                              root: :bookings)
+        query = user_bookings_query.where('flights.departs_at > ?', Time.zone.now)
+        render json: BookingSerializer.render(query, root: :bookings)
       else
         render json: BookingSerializer.render(user_bookings_query, root: :bookings)
       end
     end
 
     def admin_bookings_query
-      Booking.select('bookings.*')
-             .joins(:flight)
-             .order('flights.departs_at', 'flights.name', 'bookings.created_at')
+      Api::BookingsQuery.new.ordered_bookings
     end
 
     def user_bookings_query
-      Booking.select('bookings.*')
-             .joins(:flight)
-             .order('flights.departs_at', 'flights.name', 'bookings.created_at')
-             .where('bookings.user_id = ?', current_user.id)
+      Api::BookingsQuery.new.for_public_user(current_user)
     end
   end
 end

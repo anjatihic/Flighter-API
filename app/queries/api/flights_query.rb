@@ -1,12 +1,15 @@
-class FlightsQuery
-  attr_reader :relation
+module Api
+  class FlightsQuery
+    attr_reader :relation
 
-  def initialize(relation: Flight.includes(:company))
-    @relation = relation
-  end
+    def initialize(relation = Flight.all)
+      @relation = relation
+    end
 
-  def ordered_active_flights
-    relation.where('CURRENT_TIMESTAMP < departs_at')
-            .order('departs_at', 'name', 'created_at')
+    def ordered_active_flights
+      relation.includes(:company)
+              .where('CURRENT_TIMESTAMP < departs_at')
+              .order('departs_at', 'name', 'created_at')
+    end
   end
 end

@@ -27,7 +27,7 @@ class User < ApplicationRecord
   validates :password_digest, presence: true
 
   scope :filter_query, lambda { |query|
-    where('LOWER(email) LIKE ? OR LOWER(first_name) LIKE ? OR LOWER(last_name) LIKE ?',
+    where('email ILIKE ? OR first_name ILIKE ? OR last_name ILIKE ?',
           "%#{query}%", "%#{query}%", "%#{query}%")
   }
 

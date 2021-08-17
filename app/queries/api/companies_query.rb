@@ -1,16 +1,18 @@
-class CompaniesQuery
-  attr_reader :relation
+module Api
+  class CompaniesQuery
+    attr_reader :relation
 
-  def initialize(relation: Company.all)
-    @relation = relation
-  end
+    def initialize(relation: Company.all)
+      @relation = relation
+    end
 
-  def ordered_companies
-    relation.order('name')
-  end
-
-  def active_companies
-    relation.includes(:flights)
-            .where('flight_departs_at < ?', Time.utc.now)
+    def ordered_companies_with_filter
+      relation.select('companies.*')
+              .includes(:flights)
+              .where('flights.departs_at > ?', Time.zone.now)
+              .order('companies.name')
+              .references(:flights)
+              .distinct
+    end
   end
 end

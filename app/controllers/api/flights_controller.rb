@@ -5,7 +5,12 @@ module Api
     # GET /api/flights ----> available to everyone
     def index
       @flights = Flight.where(nil)
-      filtered_view
+
+      flight_filter_params.each do |key, value|
+        @flights = @flights.public_send(key.to_s, value) if value.present?
+      end
+
+      render json: FlightSerializer.render(flight_query_order, root: :flights)
     end
 
     # GET /api/flights/:id ------> available to everyone
@@ -62,14 +67,6 @@ module Api
       params.slice(:name_cont, :departs_at_eq, :no_of_available_seats_gteq)
     end
 
-    def filtered_view
-      flight_filter_params.each do |key, value|
-        @flights = @flights.public_send(key.to_s, value) if value.present?
-      end
-
-      render json: FlightSerializer.render(flight_query_order, root: :flights)
-    end
-
     def flight_update(flight)
       if flight.update(flight_params)
         render json: FlightSerializer.render(flight, root: :flight)
@@ -79,10 +76,7 @@ module Api
     end
 
     def flight_query_order
-      # pogledaj zasto zeitwerk ne prepoznaje FlightsQuery klasu
-      @flights.includes(:company)
-              .where('CURRENT_TIMESTAMP <  departs_at')
-              .order('departs_at', 'name', 'created_at')
+      FlightsQuery.new(@flights).ordered_active_flights
     end
   end
 end
