@@ -31,7 +31,11 @@ class Booking < ApplicationRecord
   def flight_not_overbooked
     return unless flight
 
-    errors.add(:no_of_seats, 'not enough available seats') if no_of_seats > flight.free_seats
+    difference = no_of_seats - Booking.find_by(id: id)&.no_of_seats
+
+    return if difference.negative?
+
+    errors.add(:no_of_seats, 'not enough available seats') if difference > flight.free_seats
   end
 
   def total_price
