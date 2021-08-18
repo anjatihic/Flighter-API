@@ -31,7 +31,7 @@ class Booking < ApplicationRecord
   def flight_not_overbooked
     return unless flight
 
-    return unless flight.no_of_seats <= (flight.bookings.sum('no_of_seats') + no_of_seats)
+    return if flight.no_of_seats <= flight.free_seats
 
     errors.add(:no_of_seats, 'not enough available seats on flight')
   end
