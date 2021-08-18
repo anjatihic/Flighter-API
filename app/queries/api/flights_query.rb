@@ -8,7 +8,7 @@ module Api
 
     def ordered_active_flights
       relation.includes(:company)
-              .where('CURRENT_TIMESTAMP < departs_at')
+              .where('flights.departs_at > ?', Time.now.utc)
               .order('departs_at', 'name', 'created_at')
     end
   end

@@ -18,8 +18,10 @@ class Flight < ApplicationRecord
   belongs_to :company
   has_many :bookings, dependent: :nullify
 
-  scope :name_cont, ->(word) { where('flights.name LIKE ?', "%#{word}%") }
+  scope :name_cont, ->(word) { where('flights.name ILIKE ?', "%#{word}%") }
   scope :departs_at_eq, ->(timestamp) { where("DATE_TRUNC('second', departs_at) = ?", timestamp) }
+  # scope :no_of_available_seats_gteq,
+  #       ->(no_seats) { all.select { |flight| flight.free_seats >= no_seats } }
   scope :no_of_available_seats_gteq,
         ->(no_seats) { left_outer_joins(:bookings).having('flights.no_of_seats - SUM(bookings.no_of_seats) >= ?', no_seats).group('flights.id') } # rubocop:disable Layout/LineLength
 
@@ -41,8 +43,8 @@ class Flight < ApplicationRecord
     errors.add(:departs_at, 'must be before arrival time') if departs_at > arrives_at
   end
 
-  def aircraft_must_be_available
-    return unless departs_at && arrives_at
+  def aircraft_must_be_available # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+    return unless departs_at && arrives_at && company
 
     needed_time = departs_at...arrives_at
 
@@ -51,15 +53,20 @@ class Flight < ApplicationRecord
 
       busy_time = company_flight.departs_at...company_flight.arrives_at
 
-      if busy_time.cover?(needed_time)
+      if busy_time.cover?(needed_time) # rubocop:disable Style/Next
         errors.add(:departs_at, 'no available aircrafts')
+        errors.add(:arrives_at, 'no available aircrafts')
         break
       end
     end
   end
 
   def no_of_booked_seats
-    bookings.sum('no_of_seats')
+    bookings.sum(&:no_of_seats)
+  end
+
+  def free_seats
+    no_of_seats - no_of_booked_seats
   end
 
   def current_price

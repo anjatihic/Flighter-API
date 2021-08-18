@@ -44,6 +44,98 @@ RSpec.describe 'Flights API', type: :request do
 
       expect(json_response['flights'].size).to eq 0
     end
+
+    it 'returns ordered flights' do
+      second_flight = create(:flight, name: 'zanzibar')
+      first_flight = create(:flight, departs_at: Time.now.utc.next_week)
+      third_flight = create(:flight)
+
+      expected_order = [first_flight.id, second_flight.id, third_flight.id]
+
+      get '/api/flights', headers: no_token_request_headers
+
+      flights = json_response['flights'].map { |flight| flight['id'] }
+
+      expect(flights).to eq expected_order
+    end
+
+    it 'responds only with active flights' do
+      create(:flight, departs_at: Time.now.utc + 1.second)
+      flight1 = create(:flight)
+      flight2 = create(:flight)
+
+      expected_response = [flight1.id, flight2.id]
+
+      sleep(1)
+      get '/api/flights', headers: no_token_request_headers
+
+      flights = json_response['flights'].map { |flight| flight['id'] }
+
+      expect(flights).to eq expected_response
+    end
+
+    it 'shows number of booked seats on flight' do
+      create(:flight)
+
+      get '/api/flights', headers: no_token_request_headers
+
+      expect(json_response['flights'][0]).to include('no_of_booked_seats')
+    end
+
+    it 'shows the name of the company for each flight' do
+      create(:flight)
+
+      get '/api/flights', headers: no_token_request_headers
+
+      expect(json_response['flights'][0]).to include('company_name')
+    end
+
+    it 'shows the current price for each flight' do
+      create(:flight)
+
+      get '/api/flights', headers: no_token_request_headers
+
+      expect(json_response['flights'][0]).to include('current_price')
+    end
+
+    context 'with filters' do
+      it 'responds with flights that contain a searched name entry' do
+        wanted_flight1 = create(:flight, name: 'WANTED FLIGHT')
+        wanted_flight2 = create(:flight, name: 'wanted flight')
+        create(:flight)
+
+        expected_response = [wanted_flight1.id, wanted_flight2.id]
+
+        get '/api/flights?name_cont=anted', headers: no_token_request_headers
+
+        flights_in_response = json_response['flights'].map { |flight| flight['id'] }
+
+        expect(flights_in_response).to eq expected_response
+      end
+
+      it 'responds with flights that have a searched departure' do
+        wanted_time = Time.now.utc + 1.week
+        create(:flight)
+        wanted_flight = create(:flight, departs_at: wanted_time)
+
+        get "/api/flights?departs_at_eq=#{wanted_time}", headers: no_token_request_headers
+
+        expect(json_response['flights'][0]['id']).to eq wanted_flight.id
+      end
+
+      it 'responds flights with available number of wanted seats' do
+        create(:flight, no_of_seats: 10)
+        create(:booking, no_of_seats: 8)
+        wanted_flight = create(:flight, no_of_seats: 30)
+        wanted_seats = 10
+
+        get "/api/flights?no_of_available_seats_gteq=#{wanted_seats}",
+            headers: no_token_request_headers
+
+        expect(json_response['flights'].size).to eq 1
+        expect(json_response['flights'][0]['id']).to eq wanted_flight.id
+      end
+    end
   end
 
   describe 'GET /api/flights, #show' do
@@ -166,6 +258,14 @@ RSpec.describe 'Flights API', type: :request do
             post '/api/flights', params: invalid_params.to_json,
                                  headers: admin_request_headers
           end.not_to change(Flight, :count)
+        end
+
+        it 'validates if the flights whitin the company overlap' do
+          company = create(:company)
+          create(:flight, company: company)
+          new_flight = build(:flight, company: company)
+
+          expect(new_flight.valid?).to be false
         end
       end
     end

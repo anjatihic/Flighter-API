@@ -56,6 +56,49 @@ RSpec.describe 'Bookings API', type: :request do
 
         expect(json_response['bookings'].size).to eq 0
       end
+
+      it 'returns sorted bookings' do
+        creator = create(:user, token: 'abc')
+        flight1 = create(:flight, departs_at: Time.now.utc.next_week)
+        flight2 = create(:flight, name: 'zanzibar')
+        first_booking = create(:booking, user: creator, flight: flight1)
+        second_booking = create(:booking, user: creator, flight: flight2)
+        third_booking = create(:booking, user: creator)
+
+        expected_order = [first_booking.id, second_booking.id, third_booking.id]
+
+        get '/api/bookings', headers: request_headers
+
+        bookings = json_response['bookings'].map { |booking| booking['id'] }
+
+        expect(bookings).to eq expected_order
+      end
+
+      it 'returns only bookings with active flights when filter=active added' do
+        creator = create(:user, token: 'abc')
+        flight = create(:flight, departs_at: Time.now.utc + 1.second)
+        create(:booking, user: creator, flight: flight)
+        booking1 = create(:booking, user: creator)
+        booking2 = create(:booking, user: creator)
+
+        expected_response = [booking1.id, booking2.id]
+
+        sleep(1)
+        get '/api/bookings?filter=active', headers: request_headers
+
+        bookings = json_response['bookings'].map { |booking| booking['id'] }
+
+        expect(bookings).to eq expected_response
+      end
+
+      it 'returns the total price for each booking' do
+        creator = create(:user, token: 'abc')
+        create(:booking, no_of_seats: 3, seat_price: 10, user: creator)
+
+        get '/api/bookings', headers: request_headers
+
+        expect(json_response['bookings'][0]['total_price']).to eq 30
+      end
     end
 
     context 'when authorized' do
@@ -253,6 +296,13 @@ RSpec.describe 'Bookings API', type: :request do
             post '/api/bookings', params: invalid_params.to_json,
                                   headers: admin_request_headers
           end.not_to change(Booking, :count)
+        end
+
+        it 'validates if a booking overbooks a flight' do
+          flight = create(:flight, no_of_seats: 10)
+          booking = build(:booking, flight: flight, no_of_seats: 15)
+
+          expect(booking.valid?).to be false
         end
       end
     end
