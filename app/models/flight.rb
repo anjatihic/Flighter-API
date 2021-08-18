@@ -46,12 +46,12 @@ class Flight < ApplicationRecord
   def aircraft_must_be_available # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
     return unless departs_at && arrives_at && company
 
-    needed_time = departs_at...arrives_at
+    needed_time = departs_at..arrives_at
 
     company.flights.each do |company_flight|
       next if id == company_flight.id
 
-      busy_time = company_flight.departs_at...company_flight.arrives_at
+      busy_time = company_flight.departs_at..company_flight.arrives_at
 
       if busy_time.cover?(needed_time) # rubocop:disable Style/Next
         errors.add(:departs_at, 'no available aircrafts')
