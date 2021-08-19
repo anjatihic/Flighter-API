@@ -47,7 +47,7 @@ class Flight < ApplicationRecord
 
     needed_time = departs_at..arrives_at
 
-    company.flights.each do |company_flight|
+    company.reload.flights.each do |company_flight|
       next if id == company_flight.id
 
       busy_time = company_flight.departs_at..company_flight.arrives_at
@@ -85,5 +85,11 @@ class Flight < ApplicationRecord
 
   def overlap?(wanted_time, busy_time)
     (busy_time.first <= wanted_time.last) && (wanted_time.first <= busy_time.last)
+  end
+
+  def flights_in_company
+    retrun company.reload.flights if company.id
+
+    company.flights
   end
 end
