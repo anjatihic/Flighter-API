@@ -45,7 +45,7 @@ class Flight < ApplicationRecord
   end
 
   def aircraft_must_be_available # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
-    return unless departs_at && arrives_at && company_id
+    return unless departs_at && arrives_at && company
 
     needed_time = departs_at..arrives_at
 
