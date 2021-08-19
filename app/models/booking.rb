@@ -37,10 +37,16 @@ class Booking < ApplicationRecord
     difference = no_of_seats - seats_in_a_booking
     return if difference.negative?
 
-    errors.add(:no_of_seats, 'not enough available seats') if difference > flight.reload.free_seats
+    errors.add(:no_of_seats, 'not enough available seats') if difference > total_num_of_free_seats
   end
 
   def total_price
     seat_price * no_of_seats
+  end
+
+  def total_num_of_free_seats
+    return flight.reload.free_seats if flight.id
+
+    flight.no_of_seats
   end
 end
