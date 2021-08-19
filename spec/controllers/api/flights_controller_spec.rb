@@ -124,8 +124,8 @@ RSpec.describe 'Flights API', type: :request do
       end
 
       it 'responds flights with available number of wanted seats' do
-        create(:flight, no_of_seats: 10)
-        create(:booking, no_of_seats: 8)
+        flight1 = create(:flight, no_of_seats: 10)
+        create(:booking, no_of_seats: 8, flight: flight1)
         wanted_flight = create(:flight, no_of_seats: 30)
         wanted_seats = 10
 

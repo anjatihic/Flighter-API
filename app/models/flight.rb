@@ -20,8 +20,9 @@ class Flight < ApplicationRecord
 
   scope :name_cont, ->(word) { where('flights.name ILIKE ?', "%#{word}%") }
   scope :departs_at_eq, ->(timestamp) { where("DATE_TRUNC('second', departs_at) = ?", timestamp) }
-  # scope :no_of_available_seats_gteq,
-  #       ->(no_seats) { all.select { |flight| flight.free_seats >= no_seats } }
+
+  scope :no_of_available_seats_gteq,
+        ->(no_seats) { all.select { |flight| flight.free_seats >= no_seats } }
   scope :no_of_available_seats_gteq,
         ->(no_seats) { left_outer_joins(:bookings).having('flights.no_of_seats - SUM(bookings.no_of_seats) >= ?', no_seats).group('flights.id') } # rubocop:disable Layout/LineLength
 
@@ -44,7 +45,7 @@ class Flight < ApplicationRecord
   end
 
   def aircraft_must_be_available # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
-    return unless departs_at && arrives_at && company
+    return unless departs_at && arrives_at && company_id
 
     needed_time = departs_at..arrives_at
 
@@ -53,7 +54,7 @@ class Flight < ApplicationRecord
 
       busy_time = company_flight.departs_at..company_flight.arrives_at
 
-      if busy_time.cover?(needed_time) # rubocop:disable Style/Next
+      if overlap?(busy_time, needed_time) # rubocop:disable Style/Next
         errors.add(:departs_at, 'no available aircrafts')
         errors.add(:arrives_at, 'no available aircrafts')
         break
@@ -80,5 +81,11 @@ class Flight < ApplicationRecord
       new_price = ((15 - days_left) / 15.00) * base_price + base_price
       new_price.round
     end
+  end
+
+  private
+
+  def overlap?(wanted_time, busy_time)
+    (busy_time.first <= wanted_time.last) && (wanted_time.first <= busy_time.last)
   end
 end
