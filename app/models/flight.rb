@@ -22,9 +22,7 @@ class Flight < ApplicationRecord
   scope :departs_at_eq, ->(timestamp) { where("DATE_TRUNC('second', departs_at) = ?", timestamp) }
 
   scope :no_of_available_seats_gteq,
-        ->(no_seats) { all.select { |flight| flight.free_seats >= no_seats } }
-  scope :no_of_available_seats_gteq,
-        ->(no_seats) { left_outer_joins(:bookings).having('flights.no_of_seats - SUM(bookings.no_of_seats) >= ?', no_seats).group('flights.id') } # rubocop:disable Layout/LineLength
+        ->(no_seats) { left_outer_joins(:bookings).group(:id).having('COALESCE(flights.no_of_seats - SUM(bookings.no_of_seats), flights.no_of_seats) >= ?', no_seats) } # rubocop:disable Layout/LineLength
 
   validates :name, presence: true, uniqueness: { scope: :company_id, case_sensitive: false }
 
