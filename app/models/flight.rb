@@ -47,7 +47,7 @@ class Flight < ApplicationRecord
 
     needed_time = departs_at..arrives_at
 
-    company.reload.flights.each do |company_flight|
+    flights_in_company.each do |company_flight|
       next if id == company_flight.id
 
       busy_time = company_flight.departs_at..company_flight.arrives_at
@@ -88,7 +88,7 @@ class Flight < ApplicationRecord
   end
 
   def flights_in_company
-    retrun company.reload.flights if company.id
+    return company.reload.flights if company.id
 
     company.flights
   end

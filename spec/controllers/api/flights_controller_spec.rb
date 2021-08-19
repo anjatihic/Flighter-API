@@ -267,18 +267,6 @@ RSpec.describe 'Flights API', type: :request do
 
           expect(new_flight.valid?).to be false
         end
-
-        it 'validates if the flights whitin the company overlap (edge case)' do
-          company = create(:company)
-          flight = create(:flight, company: company)
-          new_flight = build(:flight,
-                             name: 'new_name',
-                             company: company,
-                             departs_at: flight.arrives_at,
-                             arrives_at: Time.now.utc + 2.months)
-
-          expect(new_flight.valid?).to be false
-        end
       end
     end
   end
