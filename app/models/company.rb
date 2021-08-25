@@ -11,8 +11,4 @@ class Company < ApplicationRecord
   has_many :flights, dependent: :nullify
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
-
-  def no_of_active_flights
-    flights.where('departs_at > ?', Time.now.utc).count
-  end
 end

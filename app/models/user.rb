@@ -26,11 +26,6 @@ class User < ApplicationRecord
 
   validates :password_digest, presence: true
 
-  scope :filter_query, lambda { |query|
-    where('email ILIKE ? OR first_name ILIKE ? OR last_name ILIKE ?',
-          "%#{query}%", "%#{query}%", "%#{query}%")
-  }
-
   def admin?
     role == 'admin'
   end

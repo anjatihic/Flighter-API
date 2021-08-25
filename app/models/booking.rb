@@ -20,33 +20,9 @@ class Booking < ApplicationRecord
 
   validate :flight_not_in_past
 
-  validate :flight_not_overbooked
-
   def flight_not_in_past
     return unless flight
 
     errors.add(:flight, "can't be in the past") if flight.departs_at < DateTime.current
-  end
-
-  def flight_not_overbooked
-    return unless flight
-
-    seats_in_a_booking = Booking.find_by(id: id)&.no_of_seats
-    seats_in_a_booking = 0 if seats_in_a_booking.nil?
-
-    difference = no_of_seats - seats_in_a_booking
-    return if difference.negative?
-
-    errors.add(:no_of_seats, 'not enough available seats') if difference > total_num_of_free_seats
-  end
-
-  def total_price
-    seat_price * no_of_seats
-  end
-
-  def total_num_of_free_seats
-    return flight.reload.free_seats if flight.id
-
-    flight.no_of_seats
   end
 end

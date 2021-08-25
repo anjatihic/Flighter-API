@@ -48,36 +48,6 @@ RSpec.describe 'Users API', type: :request do
 
           expect(json_response['users'].size).to eq 1
         end
-
-        it 'returns sorted users' do
-          second_user = create(:user, email: 'bbc@abc.com')
-          first_user = create(:user, email: 'abc@abc.com')
-          third_user = create(:user, email: 'cbc@abc.com')
-          # fourth user is admin
-
-          expected_order = [first_user.id, second_user.id, third_user.id, admin_user.id]
-
-          get '/api/users', headers: admin_request_headers
-
-          users = json_response['users'].map { |user| user['id'] }
-
-          expect(users).to eq expected_order
-        end
-
-        it 'returns only users that match the search filter' do
-          user1 = create(:user, first_name: 'abc')
-          user2 = create(:user, last_name: 'ABC')
-          user3 = create(:user, email: 'aBc@abC.com')
-          create(:user)
-
-          expected_response = [user3.id, user1.id, user2.id]
-
-          get '/api/users?query=abc', headers: admin_request_headers
-
-          users = json_response['users'].map { |user| user['id'] }
-
-          expect(users).to eq expected_response
-        end
       end
 
       context 'when unauthorized' do
