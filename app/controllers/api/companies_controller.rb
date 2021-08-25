@@ -1,23 +1,23 @@
 module Api
   class CompaniesController < ApplicationController
-    # GET /api/companies
+    before_action :token_match, only: [:create, :update, :destroy]
+
+    # GET /api/companies ---> available to everyone
     def index
       render json: CompanySerializer.render(Company.all, root: :companies)
     end
 
-    # GET /api/companies/:id
+    # GET /api/companies/:id ----> available to everyone
     def show
-      company = Company.find_by(id: params[:id])
+      company = Company.find(params[:id])
 
-      if company
-        render json: CompanySerializer.render(company, root: :company)
-      else
-        render json: { errors: "Couldn't find the Company" }, status: :not_found
-      end
+      render json: CompanySerializer.render(company, root: :company)
     end
 
     # POST /api/companies
     def create
+      raise ResourceForbiddenError unless current_user.admin?
+
       company = Company.new(company_params)
 
       if company.save
@@ -29,21 +29,20 @@ module Api
 
     # DELETE /api/companies/:id
     def destroy
-      company = Company.find_by(id: params[:id])
-      if company
-        company.destroy
-      else
-        render json: { errors: "Couldn't find Company" }, status: :not_found
-      end
+      raise ResourceForbiddenError unless current_user.admin?
+
+      company = Company.find(params[:id])
+
+      company.destroy
     end
 
     # PATCH /api/companies/:id
     def update
-      company = Company.find_by(id: params[:id])
+      raise ResourceForbiddenError unless current_user.admin?
+
+      company = Company.find(params[:id])
 
       return company_update(company) if company
-
-      render json: { errors: "Couldn't find the Company" }, status: :not_found
     end
 
     private

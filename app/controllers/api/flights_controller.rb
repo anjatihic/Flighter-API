@@ -1,23 +1,23 @@
 module Api
   class FlightsController < ApplicationController
-    # GET /api/flights
+    before_action :token_match, only: [:create, :update, :destroy]
+
+    # GET /api/flights ----> available to everyone
     def index
       render json: FlightSerializer.render(Flight.all, root: :flights)
     end
 
-    # GET /api/flights/:id
+    # GET /api/flights/:id ------> available to everyone
     def show
-      flight = Flight.find_by(id: params[:id])
+      flight = Flight.find(params[:id])
 
-      if flight
-        render json: FlightSerializer.render(flight, root: :flight)
-      else
-        render json: { errors: "Couldn't find the Flight" }, status: :not_found
-      end
+      render json: FlightSerializer.render(flight, root: :flight)
     end
 
     # POST /api/flights
     def create
+      raise ResourceForbiddenError unless current_user.admin?
+
       flight = Flight.new(flight_params)
 
       if flight.save
@@ -29,21 +29,20 @@ module Api
 
     # DELETE /api/flights/:id
     def destroy
-      flight = Flight.find_by(id: params[:id])
-      if flight
-        flight.destroy
-      else
-        render json: { errors: "Couldn't find Flight" }, status: :not_found
-      end
+      raise ResourceForbiddenError unless current_user.admin?
+
+      flight = Flight.find(params[:id])
+
+      flight.destroy
     end
 
     # PATCH /api/flights/:id
     def update
-      flight = Flight.find_by(id: params[:id])
+      raise ResourceForbiddenError unless current_user.admin?
+
+      flight = Flight.find(params[:id])
 
       return flight_update(flight) if flight
-
-      render json: { errors: "Couldn't find the Flight" }, status: :not_found
     end
 
     private
