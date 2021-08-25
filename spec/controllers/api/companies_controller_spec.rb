@@ -44,6 +44,30 @@ RSpec.describe 'Companies API', type: :request do
 
       expect(json_response['companies'].size).to eq 0
     end
+
+    it 'orders companies by name ASC' do
+      first_company = create(:company, name: 'A-Company')
+      third_company = create(:company, name: 'C-Company')
+      second_company = create(:company, name: 'B-Company')
+
+      expected_order = [first_company.name, second_company.name, third_company.name]
+
+      get '/api/companies', headers: no_token_request_headers
+
+      companies_names = json_response['companies'].map { |company| company['name'] }
+
+      expect(companies_names).to eq expected_order
+    end
+
+    it 'returns only companies with active flights if filter=active added' do
+      new_company = create(:company)
+      create(:flight, company: new_company)
+      create_list(:company, 2)
+
+      get '/api/companies?filter=active', headers: no_token_request_headers
+
+      expect(json_response['companies'].size).to eq 1
+    end
   end
 
   describe 'GET /api/companies, #show' do

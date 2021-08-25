@@ -17,6 +17,7 @@ class BookingSerializer < Blueprinter::Base
   field :seat_price
   field :created_at
   field :updated_at
+  field :total_price
 
   association :user, blueprint: UserSerializer
   association :flight, blueprint: FlightSerializer

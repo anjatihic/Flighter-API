@@ -13,4 +13,5 @@ class CompanySerializer < Blueprinter::Base
   field :name
   field :created_at
   field :updated_at
+  field :no_of_active_flights
 end

@@ -5,9 +5,9 @@ module Api
     # GET /api/bookings
     def index
       if current_user.admin?
-        render json: BookingSerializer.render(Booking.all, root: :bookings)
+        admin_index_response
       else
-        render json: BookingSerializer.render(current_user.bookings, root: :bookings)
+        user_index_response
       end
     end
 
@@ -75,6 +75,33 @@ module Api
       else
         Booking.new(booking_params.merge!(user: current_user))
       end
+    end
+
+    def admin_index_response
+      if params['filter'] == 'active'
+        query = admin_bookings_query.where('flights.departs_at > ?', Time.zone.now)
+
+        render json: BookingSerializer.render(query, root: :bookings)
+      else
+        render json: BookingSerializer.render(admin_bookings_query, root: :bookings)
+      end
+    end
+
+    def user_index_response
+      if params['filter'] == 'active'
+        query = user_bookings_query.where('flights.departs_at > ?', Time.zone.now)
+        render json: BookingSerializer.render(query, root: :bookings)
+      else
+        render json: BookingSerializer.render(user_bookings_query, root: :bookings)
+      end
+    end
+
+    def admin_bookings_query
+      Api::BookingsQuery.new.ordered_bookings
+    end
+
+    def user_bookings_query
+      Api::BookingsQuery.new.for_public_user(current_user)
     end
   end
 end
